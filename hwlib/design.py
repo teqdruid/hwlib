@@ -48,23 +48,15 @@ class Net:
         return "net%s" % self.id
 
 
-class Design:
+class Circuit:
 
-    def __init__(self, process_library="45nm_HP"):
+    def __init__(self, parent):
         self.components = set()
         self.id_counter = 0
-        self.headers = set()
+        self.parent = parent
 
-        self.vpwr = Voltage(self, 1.0)
-        self.vdd = self.vpwr.plus
-        self.disconnect(self.vdd)
-        self.vdd.net.id = "vdd"
-        self.vss = self.vpwr.minus
-        self.disconnect(self.vss)
-        self.vss.net.id = "vss"
-
-        for (k, v) in LIBRARIES[process_library].items():
-            self.__dict__[k] = v
+    def hassubckt(self, subckt):
+        return self.parent.hassubckt(subckt)
 
     def get_id(self):
         self.id_counter += 1
@@ -72,7 +64,10 @@ class Design:
 
     def add_component(self, component):
         self.components.add(component)
-        self.headers.add(component.header)
+        self.add_header(component.header)
+
+    def add_header(self, h):
+        self.parent.add_header(h)
 
     def disconnect(self, term):
         if term.net is not None:
@@ -92,6 +87,54 @@ class Design:
             termA.net.connect(termA)
         else:
             termA.net.mergeIn(termB.net)
+
+    def length(self, length_str):
+        return self.parent.length(length_str)
+
+    def print_components(self, stream):
+        for c in self.components:
+            c.print_netlist(stream)
+
+    def print_netlist(self, stream):
+        self.print_components(stream)
+
+    def __getattr__(self, key):
+        if self.parent is None:
+            raise AttributeError("Circuit has no attribute: %s" % key)
+        if key in self.parent.__dict__:
+            return self.parent.__dict__[key]
+        else:
+            raise AttributeError("Circuit has no attribute: %s" % key)
+
+
+class Design(Circuit):
+
+    def __init__(self, process_library="45nm_HP"):
+        Circuit.__init__(self, None)
+        self.headers = set()
+        self.subckts = dict()
+
+        self.vpwr = Voltage(self, 1.0)
+        self.vdd = self.vpwr.plus
+        self.vss = self.vpwr.minus
+
+        self.disconnect(self.vdd)
+        self.vdd.net.id = "vdd"
+        self.disconnect(self.vss)
+        self.vss.net.id = "vss"
+
+        for (k, v) in LIBRARIES[process_library].items():
+            self.__dict__[k] = v
+
+    def hassubckt(self, subckt):
+        return subckt in self.subckts
+
+    def add_subckt(self, subckt):
+        assert subckt.id not in self.subckts
+        self.subckts[subckt.id] = subckt
+
+    def add_header(self, h):
+        self.headers.add(h)
 
     def length(self, length_str):
         if len(length_str) < 2:
@@ -120,6 +163,10 @@ class Design:
             if h != "":
                 stream.write(h)
                 stream.write("\n")
+        stream.write("\n")
+
+        for sc in self.subckts.values():
+            sc.print_netlist(stream)
         stream.write("\n")
 
     def print_components(self, stream):

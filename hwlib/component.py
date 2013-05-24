@@ -5,7 +5,7 @@ __all__ = ["Component"]
 
 from string import Formatter
 import util
-from exceptions import UnconnectedException
+from hwlib.exceptions import UnconnectedException
 
 
 class NetlistFormatter(Formatter):
