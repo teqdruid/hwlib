@@ -8,14 +8,19 @@ from hwlib.basic_circuits import *
 
 d = Design()
 
-n1 = NMos(d)
-d.pair({n1.gate: d.vss,
-        n1.drain: d.vss,
-        n1.source: d.vss})
-
+pwl = VPwl(d, [(0, 0),
+               ("5n", 1.0),
+               ("10n", 0)])
 i1 = Inverter(d)
-d.connect(i1.input, d.vss)
-d.disconnect(i1.output)
+r1 = Resistor(d, 10000)
+c1 = Capacitor(d, 2e-15)
+
+d.pair({i1.input: pwl.plus,
+        pwl.minus: d.vss,
+        i1.output: r1.a,
+        r1.b: d.vss,
+        c1.pos: i1.output,
+        c1.neg: d.vss})
 
 # print n1.gate.__dict__
 
