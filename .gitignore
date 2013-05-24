@@ -1,3 +1,8 @@
+*.net
+*.raw
+*.out
+*.log
+
 *.py[cod]
 
 # C extensions
