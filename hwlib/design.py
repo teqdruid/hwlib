@@ -51,7 +51,7 @@ class Net:
 class Circuit:
 
     def __init__(self, parent):
-        self.components = set()
+        self.components = []
         self.id_counter = 0
         self.parent = parent
 
@@ -63,7 +63,7 @@ class Circuit:
         return self.id_counter
 
     def add_component(self, component):
-        self.components.add(component)
+        self.components.append(component)
         self.add_header(component.header)
 
     def add_header(self, h):
