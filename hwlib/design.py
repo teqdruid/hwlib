@@ -84,7 +84,7 @@ class Circuit:
         elif termA.net is None and termB.net is not None:
             termB.net.connect(termA)
         elif termB.net is None and termA.net is not None:
-            termA.net.connect(termA)
+            termA.net.connect(termB)
         else:
             termA.net.mergeIn(termB.net)
 
