@@ -9,9 +9,9 @@ from hwlib.basic_circuits import *
 d = Design()
 
 n1 = NMos(d)
-d.connect(n1.gate, d.vss)
-d.connect(n1.drain, d.vss)
-d.connect(n1.source, d.vss)
+d.pair({n1.gate: d.vss,
+        n1.drain: d.vss,
+        n1.source: d.vss})
 
 i1 = Inverter(d)
 d.connect(i1.input, d.vss)

@@ -88,6 +88,10 @@ class Circuit:
         else:
             termA.net.mergeIn(termB.net)
 
+    def pair(self, pairs):
+        for (a, b) in pairs.items():
+            self.connect(a, b)
+
     def length(self, length_str):
         return self.parent.length(length_str)
 
