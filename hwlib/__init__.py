@@ -4,3 +4,4 @@
 from design import *
 from component import *
 from exceptions import *
+from simulation import *
