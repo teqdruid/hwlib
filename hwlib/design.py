@@ -127,6 +127,11 @@ class Design(Circuit):
         self.disconnect(self.vss)
         self.vss.net.id = "vss"
 
+        # NGSpice likes a zero reference
+        vss = Voltage(self, 0.0)
+        vss.minus = "0"
+        self.connect(self.vss, vss.plus)
+
         for (k, v) in LIBRARIES[process_library].items():
             self.__dict__[k] = v
 
