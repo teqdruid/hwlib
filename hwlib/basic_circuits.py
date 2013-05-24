@@ -19,8 +19,8 @@ class Inverter(SubcktComponent):
     def assemble_subckt(self, design):
         n = NMos(design)
         p = PMos(design)
-        n.drain = "vdd"
-        p.drain = "vss"
+        n.drain = "vss"
+        p.drain = "vdd"
         n.gate = "input"
         p.gate = "input"
         n.source = "output"
