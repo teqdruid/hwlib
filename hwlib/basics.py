@@ -7,7 +7,7 @@ from hwlib.component import Component
 class Voltage(Component):
 
     netlist_format = "V{id} {connections} {voltage}V"
-    connection_names = ['minus', 'plus']
+    connection_names = ['plus', 'minus']
 
     def __init__(self, design, voltage):
         Component.__init__(self, design)
@@ -17,7 +17,7 @@ class Voltage(Component):
 class VPwl(Component):
 
     netlist_format = "V{id} {connections} pwl({v_pairs})"
-    connection_names = ['minus', 'plus']
+    connection_names = ['plus', 'minus']
 
     def __init__(self, design, vpairs):
         Component.__init__(self, design)
