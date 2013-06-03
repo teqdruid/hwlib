@@ -33,4 +33,4 @@ pmon = s.power(d.vpwr)
 s.run(d)
 
 print "VPwr:"
-print "  Avg: ", pmon.avg()
+print "  Avg: %e" % pmon.avg()

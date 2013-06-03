@@ -38,26 +38,28 @@ tran {ts} {time}
             self.sim.add_monitor(cppmon)
         self.sim.run_trans(self.timestep, self.time)
 
-    def power(self, device, terminal=None):
-        pm = PowerMonitor(device, terminal)
+    def power(self, device, terminal=None, branch="branch"):
+        pm = PowerMonitor(device, terminal, branch)
         self.monitors.append(pm)
         return pm
 
 
 class PowerMonitor:
 
-    def __init__(self, device, terminal):
+    def __init__(self, device, terminal, branch):
         if terminal is None:
             terminal = device.__dict__[device.connection_names[0]]
         self.device = device
         self.terminal = terminal
+        self.branch = branch
         self.cppmon = None
 
     def create(self):
         termnet = self.terminal
         if not isinstance(termnet, str):
             termnet = self.terminal.net.get_name()
-        self.cppmon = hwcpplib.powermonitor(self.device.get_spice_id(),
+        branchname = self.device.get_spice_id() + "#" + self.branch
+        self.cppmon = hwcpplib.powermonitor(branchname,
                                             termnet)
         return self.cppmon
 

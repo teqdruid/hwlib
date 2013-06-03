@@ -14,7 +14,7 @@ namespace hwlib {
 
 class Monitor {
 public:
-	virtual std::vector<std::string> get_node_names() { return { }; }
+	virtual std::vector<std::string> get_vector_names() { return { }; }
 	virtual void init() { };
 	virtual void data(double abs_time, double time_diff, double* v) { };
 };
@@ -27,8 +27,16 @@ class SpiceSimulation {
 	std::string sim_name;
 	std::string netlist;
 
+public:
+	double time_step, time;
 	std::set<Monitor*> monitors;
-	std::map<Monitor*, int[MAX_MONITOR_NODES] > monitor_indexes;
+	std::map<Monitor*, int*> monitor_indexes;
+
+	enum {
+		Running,
+		Halted,
+		Done
+	} bg_status;
 
 public:
 	SpiceSimulation(std::string name = std::string(""),
@@ -51,7 +59,7 @@ public:
 };
 
 class PowerMonitor : public Monitor {
-	std::string dev_name;
+	std::string curr_name;
 	std::string net_name;
 
 	double weighted_total;
@@ -60,13 +68,14 @@ class PowerMonitor : public Monitor {
 	double min_pwr;
 
 public:
-	PowerMonitor(std::string dev, std::string net) {
-		this->dev_name = dev;
+	PowerMonitor(std::string current, std::string net) {
+		this->curr_name = current;
+		this->net_name = net;
 	}
 
-	std::vector<std::string> get_node_names() {
-		return {"i(" + this->dev_name + ")",
-		        "v(" + this->net_name + ")"};
+	std::vector<std::string> get_vector_names() {
+		return {this->curr_name,
+		        this->net_name};
 	}
 
 	void init() {
