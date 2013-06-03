@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+
+#include <cassert>
 
 namespace hwlib {
 
@@ -17,11 +20,15 @@ public:
 };
 
 class SpiceSimulation {
+	static bool SpiceInUse;
+	void InitSpice();
+	void UnInitSpice();
+
 	std::string sim_name;
 	std::string netlist;
 
-	std::map<std::string, std::vector<Monitor*> > monitors;
-	std::map<Monitor*, int* > monitor_indexes;
+	std::set<Monitor*> monitors;
+	std::map<Monitor*, int[MAX_MONITOR_NODES] > monitor_indexes;
 
 public:
 	SpiceSimulation(std::string name = std::string(""),
@@ -33,7 +40,10 @@ public:
 	void set_netlist(std::string netlist) {
 		this->netlist = netlist;
 	}
-	void add_monitor(Monitor* m);
+	void add_monitor(Monitor* m) {
+		assert(m != NULL && "Monitor must not be NULL");
+		this->monitors.insert(m);
+	}
 
 	// Run a transient analysis with particular time step and
 	//   maximum amount of simulated time in seconds
