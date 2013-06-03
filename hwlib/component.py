@@ -34,6 +34,14 @@ class Component:
         self.id = design.get_id()
         design.add_component(self)
 
+    def get_spice_id(self):
+        f = NetlistFormatter()
+        d = dict(self.__dict__)
+        d["connections"] = " ".join(map(self.get_connection_str,
+                                        self.connection_names))
+        s = f.vformat(self.netlist_format, [], d)
+        return s.split(" ")[0]
+
     def get_connection_str(self, cname):
         c = self.__dict__[cname]
         if isinstance(c, str):
