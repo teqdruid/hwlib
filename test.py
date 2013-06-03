@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import sys
+# import sys
 from hwlib import *
 from hwlib.basics import *
 from hwlib.basic_circuits import *
@@ -25,7 +25,12 @@ d.pair({i1.input: pwl.plus,
 
 # print n1.gate.__dict__
 
-d.print_netlist(sys.stdout)
+# d.print_netlist(sys.stdout)
 
-s = Simulation("10n", "test.raw")
-s.print_netlist(sys.stdout)
+s = Simulation("10n")
+# s.print_netlist(sys.stdout)
+pmon = s.power(d.vpwr)
+s.run(d)
+
+print "VPwr:"
+print "  Avg: ", pmon.avg()
