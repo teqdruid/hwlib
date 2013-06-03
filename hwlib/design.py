@@ -3,18 +3,11 @@
 
 from hwlib.exceptions import ParseException
 from hwlib.basics import Voltage
+import util
 
 __all__ = ["Design"]
 
 NM = 1e-9
-
-PREFIXES = {
-    "f": 1e-15,
-    "p": 1e-12,
-    "n": 1e-9,
-    "u": 1e-6,
-    "m": 1e-3
-}
 
 LIBRARIES = {
     "45nm_HP": {
@@ -149,11 +142,7 @@ class Design(Circuit):
         if len(length_str) < 2:
             raise ParseException("length_str is too short")
         if length_str[-1] == 'm':
-            factor = length_str[-2]
-            if not factor.isalpha():
-                return float(length_str[0:-1])
-            num = float(length_str[0:-2])
-            return num * PREFIXES[factor]
+            return util.parse_suffix(length_str[0:-1])
 
         if length_str[-1] == "X" or length_str[-1] == 'x':
             return float(length_str[0:-1]) * self.min_feat_size
