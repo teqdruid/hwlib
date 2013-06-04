@@ -39,13 +39,15 @@ class Component:
         sid = self.get_spice_id()
         self.design.sim.alter(sid, param)
 
-    def get_spice_id(self):
+    def get_spice_line(self):
         f = NetlistFormatter()
         d = dict(self.__dict__)
         d["connections"] = " ".join(map(self.get_connection_str,
                                         self.connection_names))
-        s = f.vformat(self.netlist_format, [], d)
-        return s.split(" ")[0]
+        return f.vformat(self.netlist_format, [], d)
+
+    def get_spice_id(self):
+        return self.get_spice_line().split(" ")[0]
 
     def get_connection_str(self, cname):
         c = self.__dict__[cname]
@@ -56,11 +58,7 @@ class Component:
         return c.net.get_name()
 
     def print_netlist(self, stream):
-        f = NetlistFormatter()
-        d = dict(self.__dict__)
-        d["connections"] = " ".join(map(self.get_connection_str,
-                                        self.connection_names))
-        s = f.vformat(self.netlist_format, [], d)
+        s = self.get_spice_line()
         stream.write(s)
         if s[-1] != "\n":
             stream.write("\n")
