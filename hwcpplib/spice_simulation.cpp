@@ -16,7 +16,7 @@ bool SpiceSimulation::SpiceInUse = false;
    preceded by token stdout, same with stderr.*/
 static int ng_getchar(char* outputreturn, void* userdata)
 {
-    printf("%s\n", outputreturn);
+    // printf("%s\n", outputreturn);
     return 0;
 }
 

@@ -6,6 +6,7 @@ import hwcpplib
 import StringIO
 
 from component import Component
+from hwlib.basics import VPwl, Resistor
 
 
 class Simulation:
@@ -19,7 +20,17 @@ class Simulation:
         self.monitors = []
         self.halts = []
 
+        self.add_dummy(design)
         self.design.set_simulation(self)
+
+    def add_dummy(self, d):
+        pwldummy = VPwl(d, [(0, 0),
+                       ("100p", 1.0)])
+        r1 = Resistor(d, 100000000)
+        d.pair({r1.a: pwldummy.plus,
+                r1.b: d.vss,
+                pwldummy.minus: d.vss})
+        self.levelhalt(pwldummy.plus, 1.0, True)
 
     def print_netlist(self, stream):
         write = ""
