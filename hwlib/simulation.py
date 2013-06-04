@@ -62,6 +62,11 @@ tran {ts} {time}
     def resume(self):
         self.sim.resume()
 
+    def run_full(self):
+        self.run()
+        while self.status == self.status.halted:
+            self.resume()
+
     def power(self, device, terminal=None, branch="branch"):
         pm = PowerMonitor(device, terminal, branch)
         self.monitors.append(pm)
