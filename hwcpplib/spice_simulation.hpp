@@ -77,6 +77,9 @@ public:
 		this->halts.insert(hc);
 	}
 
+	void ngspice_command(std::string cmd);
+	void alter(std::string device, std::string param);
+
 	// Run a transient analysis with particular time step and
 	//   maximum amount of simulated time in seconds
 	void run_trans(double time_step, double max_time);
@@ -161,6 +164,7 @@ public:
 	}
 
 	void data(double abs_time, double tdelta, double* va) {
+		// printf("%le, %d, %le, %le\n", level, rising, last_voltage, va[0]);
 		double v = va[0];
 		if (std::isinf(last_voltage)) {
 			last_voltage = v;

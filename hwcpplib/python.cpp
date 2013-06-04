@@ -14,6 +14,8 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("run_trans", &SpiceSimulation::run_trans)
 		.def("resume", &SpiceSimulation::resume)
 		.def_readonly("status", &SpiceSimulation::bg_status)
+		.def("ngspice_command", &SpiceSimulation::ngspice_command)
+		.def("alter", &SpiceSimulation::alter)
 	;
 
 	enum_<SpiceSimulation::Status>("status")

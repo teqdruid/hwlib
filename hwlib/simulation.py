@@ -61,6 +61,9 @@ tran {ts} {time}
         self.halts.append(lh)
         return lh
 
+    def __getattr__(self, key):
+        return getattr(self.sim, key)
+
 
 class PowerMonitor:
 
@@ -100,3 +103,15 @@ class LevelHalt:
             net = net.get_name()
         self.cppmon = hwcpplib.levelhalt(sim.sim, net, self.level, self.rising)
         return self.cppmon
+
+    def highgoing(self):
+        self.level = 0.99
+        self.rising = True
+        self.cppmon.level = self.level
+        self.cppmon.rising = self.rising
+
+    def lowgoing(self):
+        self.level = 0.01
+        self.rising = False
+        self.cppmon.level = self.level
+        self.cppmon.rising = self.rising

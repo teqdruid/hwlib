@@ -185,11 +185,11 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	char** linesC = new char*[lines.size()];
 	copy(lines.begin(), lines.end(), linesC);
 
-	// char** lineptr = linesC;
-	// while (*lineptr != NULL) {
-	// 	puts(*lineptr);
-	// 	lineptr++;
-	// }
+	char** lineptr = linesC;
+	while (*lineptr != NULL) {
+		puts(*lineptr);
+		lineptr++;
+	}
 
 	rc = ngSpice_Circ(linesC);
 	assert(rc == 0 && "ngspice Error parsing netlist!");
@@ -251,6 +251,19 @@ void SpiceSimulation::run_loop() {
 			assert(rc == 0 && "ngspice Command error on 'write'");
 		}
 	}
+}
+
+void SpiceSimulation::ngspice_command(std::string cmd) {
+	int rc = ngSpice_Command((char*)cmd.c_str());
+	assert(rc == 0 && "ngspice Command error");
+}
+
+void SpiceSimulation::alter(std::string device, std::string param) {
+	char buf[10240];
+	std::transform(device.begin(), device.end(), device.begin(), ::tolower);
+	snprintf(buf, 10240, "alter %s = %s", device.c_str(), param.c_str());
+	int rc = ngSpice_Command(buf);
+	assert(rc == 0 && "ngspice Command error on 'alter'");
 }
 
 };

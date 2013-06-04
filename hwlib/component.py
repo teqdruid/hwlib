@@ -32,7 +32,12 @@ class Component:
         for cn in self.connection_names:
             self.__dict__[cn] = Component.Terminal(self)
         self.id = design.get_id()
+        self.design = design
         design.add_component(self)
+
+    def alter(self, param):
+        sid = self.get_spice_id()
+        self.design.sim.alter(sid, param)
 
     def get_spice_id(self):
         f = NetlistFormatter()
