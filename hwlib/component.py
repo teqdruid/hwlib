@@ -44,6 +44,8 @@ class Component:
         d = dict(self.__dict__)
         d["connections"] = " ".join(map(self.get_connection_str,
                                         self.connection_names))
+        for cn in self.connection_names:
+            d[cn] = self.get_connection_str(cn)
         return f.vformat(self.netlist_format, [], d)
 
     def get_spice_id(self):
