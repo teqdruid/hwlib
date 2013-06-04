@@ -22,19 +22,26 @@ class Subcircuit(Circuit):
 class SubcktComponent(Component):
 
     subckt_basename = ""
-    has_suffix = False
     netlist_format = "Xinv{id} {connections} {subckt}"
+    suffix_components = []
 
     def __init__(self, design):
         Component.__init__(self, design)
 
-        if self.has_suffix:
+        if self.has_suffix():
             self.subckt = self.subckt_basename + "_" + self.suffix()
         else:
             self.subckt = self.subckt_basename
 
         if not design.hassubckt(self.subckt):
             self.build_subckt(design)
+
+    def has_suffix(self):
+        return len(self.suffix_components) > 0
+
+    def suffix(self):
+        return "_".join(map(lambda c: "%s%s" % (c[0], getattr(self, c)),
+                            self.suffix_components))
 
     def build_subckt(self, design):
         circuit = Subcircuit(design, self.subckt, self.connection_names)

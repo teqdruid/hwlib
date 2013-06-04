@@ -142,6 +142,8 @@ class Design(Circuit):
         self.headers.add(h)
 
     def length(self, length_str):
+        if isinstance(length_str, float):
+            return length_str
         if len(length_str) < 2:
             raise ParseException("length_str is too short")
         if length_str[-1] == 'm':

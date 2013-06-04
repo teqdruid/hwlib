@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# import sys
+import sys
 from hwlib import *
 from hwlib.basics import *
 from hwlib.basic_circuits import *
@@ -18,6 +18,8 @@ d.pair({i1.input: pwl.plus,
         c1.pos: i1.output,
         c1.neg: d.vss
         })
+
+d.print_netlist(sys.stdout)
 
 s = Simulation(d, "10n", "test simulation", "test.raw")
 pmon = s.power(d.vpwr)
