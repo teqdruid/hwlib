@@ -135,6 +135,9 @@ class Design(Circuit):
         assert subckt.id not in self.subckts
         self.subckts[subckt.id] = subckt
 
+    def set_simulation(self, sim):
+        self.sim = sim
+
     def add_header(self, h):
         self.headers.add(h)
 

@@ -5,6 +5,8 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <limits>
+#include <cmath>
 
 #include <cassert>
 
@@ -19,6 +21,15 @@ public:
 	virtual void data(double abs_time, double time_diff, double* v) { };
 };
 
+class HaltCondition {
+protected:
+	bool dohalt;
+public:
+	HaltCondition() : dohalt(false) { }
+	virtual bool halt() { return dohalt; }
+	virtual void reset() { this->dohalt = false; }
+};
+
 class SpiceSimulation {
 	static bool SpiceInUse;
 	void InitSpice();
@@ -26,14 +37,19 @@ class SpiceSimulation {
 
 	std::string sim_name;
 	std::string netlist;
+	std::string write_filename;
 
 public:
 	double time_step, time;
 	std::set<Monitor*> monitors;
+	std::set<HaltCondition*> halts;
 	std::map<Monitor*, int*> monitor_indexes;
 
-	enum {
+	volatile enum Status {
+		None,
 		Running,
+		HaltRequested,
+		HaltStarting,
 		Halted,
 		Done
 	} bg_status;
@@ -45,6 +61,10 @@ public:
 		this->set_netlist(netlist);
 	}
 
+	void set_output_file(std::string outfn) {
+		this->write_filename = outfn;
+	}
+
 	void set_netlist(std::string netlist) {
 		this->netlist = netlist;
 	}
@@ -52,10 +72,18 @@ public:
 		assert(m != NULL && "Monitor must not be NULL");
 		this->monitors.insert(m);
 	}
+	void add_halt(HaltCondition* hc) {
+		assert(hc != NULL && "HaltCondition mustn't be NULL!");
+		this->halts.insert(hc);
+	}
 
 	// Run a transient analysis with particular time step and
 	//   maximum amount of simulated time in seconds
 	void run_trans(double time_step, double max_time);
+	void resume();
+
+private:
+	void run_loop();
 };
 
 class PowerMonitor : public Monitor {
@@ -105,6 +133,47 @@ public:
 	}
 	double max() { return this->max_pwr; }
 	double min() { return this->min_pwr; }
+};
+
+class LevelHalt : public Monitor, public HaltCondition {
+	std::string net_name;
+	double last_voltage;
+
+public:
+	double level;
+	bool rising;
+
+	LevelHalt(SpiceSimulation* sim, std::string net, double level, bool rising) {
+		this->net_name = net;
+		this->level = level;
+		this->rising = rising;
+
+		sim->add_monitor(this);
+		sim->add_halt(this);
+	}
+
+	std::vector<std::string> get_vector_names() {
+		return {this->net_name};
+	}
+
+	void init() {
+		this->last_voltage = std::numeric_limits<double>::infinity();
+	}
+
+	void data(double abs_time, double tdelta, double* va) {
+		double v = va[0];
+		if (std::isinf(last_voltage)) {
+			last_voltage = v;
+			return;
+		}
+
+		if (rising && v >= level && last_voltage < level) {
+			dohalt = true;
+		} else if (!rising && v <= level && last_voltage > level) {
+			dohalt = true;
+		}
+		last_voltage = v;
+	}
 };
 
 };

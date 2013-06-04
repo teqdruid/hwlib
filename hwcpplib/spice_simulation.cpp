@@ -52,6 +52,21 @@ static int ng_data(pvecvaluesall vdata, int numvecs, SpiceSimulation* sim)
 	}
 
 	sim->time += sim->time_step;
+
+	bool halt = false;
+	BOOST_FOREACH(auto hc, sim->halts) {
+		if (hc->halt()) {
+			// HALT requested!
+			halt = true;
+		}
+	}
+	if (halt) {
+		sim->bg_status = SpiceSimulation::HaltRequested;
+		while (sim->bg_status != SpiceSimulation::HaltStarting)
+			usleep(100);
+		// Sleep to make sure the other thread runs the halt before I return
+		usleep(1000);
+	}
 	return 0;
 }
 
@@ -97,8 +112,12 @@ static int ng_initdata(pvecinfoall intdata, SpiceSimulation* sim)
 
 static int ng_thread_runs(bool noruns, SpiceSimulation* sim)
 {
-	if (noruns == true)
-		sim->bg_status = SpiceSimulation::Done;
+	if (noruns == true) {
+		if (sim->bg_status == SpiceSimulation::Running)
+			sim->bg_status = SpiceSimulation::Done;
+		else if (sim->bg_status == SpiceSimulation::HaltStarting)
+			sim->bg_status = SpiceSimulation::Halted;
+	}
 
     return 0;
 }
@@ -156,9 +175,10 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 		}
 	}
 
-	char transline[1024];
-	snprintf(transline, 1024, ".tran %le %le", time_step, max_time);
-	lines.push_back(strdup(transline));
+	char buf[1024];
+	snprintf(buf, 1024, ".tran %le %le", time_step, max_time);
+	lines.push_back(strdup(buf));
+
 	lines.push_back(strdup(".end"));
 	lines.push_back(NULL);
 
@@ -174,6 +194,11 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	rc = ngSpice_Circ(linesC);
 	assert(rc == 0 && "ngspice Error parsing netlist!");
 
+	// Resetting halts
+	BOOST_FOREACH(auto hc, halts) {
+		hc->reset();
+	}
+
 	printf("Running simulation...\n");
 	bg_status = Running;
 	this->time = 0;
@@ -185,11 +210,47 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	}
 	delete linesC;
 
+	run_loop();
+}
+
+void SpiceSimulation::resume() {
+	assert(bg_status == Halted && "Can only resume halted simulation!");
+
+	// Resetting halts
+	BOOST_FOREACH(auto hc, halts) {
+		hc->reset();
+	}
+
+	bg_status = Running;
+	int rc = ngSpice_Command((char*)"bg_resume");
+	assert(rc == 0 && "ngspice Command error on 'bg_halt'");
+
+	run_loop();
+}
+
+void SpiceSimulation::run_loop() {
 	while (bg_status == Running) {
 		usleep(1000);
 	}
 
-	UnInitSpice();
+	if (bg_status == HaltRequested) {
+		bg_status = HaltStarting;
+		int rc = ngSpice_Command((char*)"bg_halt");
+		assert(rc == 0 && "ngspice Command error on 'bg_halt'");
+
+		while (bg_status != Halted)
+			sched_yield();
+	} else if (bg_status == Done) {
+		UnInitSpice();
+
+		if (this->write_filename != "") {
+			char buf[1024];
+			snprintf(buf, 1024, "write %s", this->write_filename.c_str());
+			printf("Writing output file\n");
+			int rc = ngSpice_Command(buf);
+			assert(rc == 0 && "ngspice Command error on 'write'");
+		}
+	}
 }
 
 };

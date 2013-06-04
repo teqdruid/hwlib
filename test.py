@@ -27,10 +27,17 @@ d.pair({i1.input: pwl.plus,
 
 # d.print_netlist(sys.stdout)
 
-s = Simulation("10n")
+s = Simulation(d, "10n", "test simulation", "test.raw")
 # s.print_netlist(sys.stdout)
 pmon = s.power(d.vpwr)
-s.run(d)
+outlevel = s.levelhalt(i1.output, 0.05, False)
+s.run()
+
+while s.sim.status == s.sim.status.halted:
+    print "Halt!"
+    s.resume()
+
+print "Simulation end with ", s.sim.status
 
 print "VPwr:"
 print "  Avg: %e" % pmon.avg()
