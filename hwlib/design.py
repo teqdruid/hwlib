@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import sys
 from hwlib.exceptions import ParseException
 from hwlib.basics import Voltage
 import util
@@ -15,6 +16,9 @@ LIBRARIES = {
         "includes": ['ptm/45nm_HP.pm']
     }
 }
+
+import os
+MyDir = os.path.dirname(__file__)
 
 
 class Net:
@@ -157,7 +161,7 @@ class Design(Circuit):
     def print_includes(self, stream):
         stream.write("*  -- Includes --\n")
         for i in self.includes:
-            stream.write(".include %s\n" % i)
+            stream.write(".include %s/../%s\n" % (MyDir, i))
         stream.write("\n")
 
     def print_headers(self, stream):
@@ -178,7 +182,7 @@ class Design(Circuit):
             c.print_netlist(stream)
         stream.write("\n")
 
-    def print_netlist(self, stream):
+    def print_netlist(self, stream=sys.stdout):
         self.print_includes(stream)
         self.print_headers(stream)
         self.print_components(stream)
