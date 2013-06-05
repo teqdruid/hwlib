@@ -163,8 +163,6 @@ class Design(Circuit):
         raise ParseException("Did not recognize length string format")
 
     def add_assertions(self):
-        for subckt in self.subckts:
-            subckt.add_assertions()
         for c in self.components:
             c.add_assertions()
 
