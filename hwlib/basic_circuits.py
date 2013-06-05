@@ -30,3 +30,30 @@ class Inverter(SubcktComponent):
         p.source = "output"
         n.body = "vss"
         p.body = "vdd"
+
+
+class PassGate(SubcktComponent):
+
+    subckt_basename = "PassGate"
+    netlist_format = "Xpg{id} {connections} {subckt}"
+    connection_names = ["a", "b", "en", "enp", "vdd", "vss"]
+    suffix_components = ["width", "ratio"]
+
+    def __init__(self, design, width="1x", ratio=2):
+        self.width = design.length(width)
+        self.ratio = ratio
+        SubcktComponent.__init__(self, design)
+        design.connect(self.vdd, design.vdd)
+        design.connect(self.vss, design.vss)
+
+    def assemble_subckt(self, design):
+        n = NMos(design, self.width)
+        p = PMos(design, (self.width * self.ratio))
+        n.drain = "a"
+        p.drain = "a"
+        n.gate = "en"
+        p.gate = "enp"
+        n.source = "b"
+        p.source = "b"
+        n.body = "vss"
+        p.body = "vdd"
