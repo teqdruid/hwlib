@@ -72,13 +72,23 @@ tran {ts} {time}
         self.monitors.append(pm)
         return pm
 
-    def levelhalt(self, net, level, rising):
-        lh = LevelHalt(net, level, rising)
+    def levelhalt(self, net, level, rising, base_net=None):
+        if base_net is None:
+            base_net = self.design.vss
+        lh = LevelHalt(net, base_net, level, rising)
         self.halts.append(lh)
         return lh
 
     def __getattr__(self, key):
         return getattr(self.sim, key)
+
+
+def resolve_net(net):
+    if not isinstance(net, str):
+        if isinstance(net, Component.Terminal):
+            net = net.net
+        net = net.get_name()
+    return net
 
 
 class PowerMonitor:
@@ -92,9 +102,7 @@ class PowerMonitor:
         self.cppmon = None
 
     def create(self, sim):
-        termnet = self.terminal
-        if not isinstance(termnet, str):
-            termnet = self.terminal.net.get_name()
+        termnet = resolve_net(self.terminal)
         branchname = self.device.get_spice_id() + "#" + self.branch
         self.cppmon = hwcpplib.powermonitor(branchname,
                                             termnet)
@@ -106,18 +114,17 @@ class PowerMonitor:
 
 class LevelHalt:
 
-    def __init__(self, net, level, rising):
+    def __init__(self, net, base_net, level, rising):
         self.net = net
+        self.base_net = base_net
         self.level = level
         self.rising = rising
 
     def create(self, sim):
-        net = self.net
-        if not isinstance(net, str):
-            if isinstance(net, Component.Terminal):
-                net = net.net
-            net = net.get_name()
-        self.cppmon = hwcpplib.levelhalt(sim.sim, net, self.level, self.rising)
+        net = resolve_net(self.net)
+        base_net = resolve_net(self.base_net)
+        self.cppmon = hwcpplib.levelhalt(sim.sim, net, base_net,
+                                         self.level, self.rising)
         return self.cppmon
 
     def highgoing(self):

@@ -39,7 +39,8 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("halt", &HaltCondition::halt)
 	;
 
-	class_<LevelHalt, bases<Monitor, HaltCondition> >("levelhalt", init<SpiceSimulation*, std::string, double, bool>())
+	class_<LevelHalt, bases<Monitor, HaltCondition> >
+		("levelhalt", init<SpiceSimulation*, std::string, std::string, double, bool>())
 		.def_readwrite("level", &LevelHalt::level)
 		.def_readwrite("rising", &LevelHalt::rising)
 	;
