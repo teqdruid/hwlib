@@ -39,6 +39,9 @@ class Net:
     def isdisconnected(self):
         return len(self.terminals) == 1
 
+    def name(self, name):
+        self.id = name
+
     def get_name(self):
         if isinstance(self.id, str):
             return self.id
@@ -49,6 +52,7 @@ class Circuit:
 
     def __init__(self, parent):
         self.components = []
+        self.net_names = set()
         self.id_counter = 0
         self.parent = parent
 
@@ -84,6 +88,16 @@ class Circuit:
             termA.net.connect(termB)
         else:
             termA.net.mergeIn(termB.net)
+
+    def name(self, names):
+        for (term, name) in names.items():
+            net = term
+            if not isinstance(term, Net):
+                if term.net is None:
+                    term.net = Net(self.get_id())
+                net = term.net
+            assert name not in self.net_names
+            net.name(name)
 
     def pair(self, pairs):
         for (a, b) in pairs.items():
