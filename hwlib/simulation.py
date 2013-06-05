@@ -67,7 +67,6 @@ tran {ts} {time}
         for hc in self.halts:
             cppmon = hc.create(self)
             self.haltmap[cppmon.getid()] = hc
-            print cppmon, hc
         if self.outfn != "" and self.outfn is not None:
             self.sim.set_output_file(self.outfn)
 

@@ -21,8 +21,7 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("ngspice_command", &SpiceSimulation::ngspice_command)
 		.def("alter", &SpiceSimulation::alter)
 	;
-	register_ptr_to_python< SpiceSimulationPtr >();
-
+	
 	enum_<SpiceSimulation::Status>("status")
 		.value("none", SpiceSimulation::None)
 		.value("done", SpiceSimulation::Done)
@@ -32,14 +31,10 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 	class_<Monitor, MonitorPtr>("monitor")
 	;
 
-	register_ptr_to_python< MonitorPtr >();
-
 	class_<HaltCondition, HaltConditionPtr, boost::noncopyable>("haltcondition")
 		.def("halt", &HaltCondition::halt)
 		.def("getid", &HaltCondition::getid)
 	;
-
-	register_ptr_to_python< HaltConditionPtr >();
 
 	class_<std::vector<HaltConditionPtr> >("HaltConditionVec")
         .def(vector_indexing_suite<std::vector<HaltConditionPtr>, true >())
@@ -51,16 +46,12 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("min", &PowerMonitor::min)
 	;
 
-	register_ptr_to_python< boost::shared_ptr<PowerMonitor> >();
-
 	class_<LevelHalt, boost::shared_ptr<LevelHalt>, boost::noncopyable, bases<Monitor, HaltCondition> >
 		("levelhalt", init<std::string, std::string, double, bool>())
 		.def("setup", &LevelHalt::setup)
 		.def_readwrite("level", &LevelHalt::level)
 		.def_readwrite("rising", &LevelHalt::rising)
 	;
-
-	register_ptr_to_python< boost::shared_ptr<LevelHalt> >();
 }
 
 };
