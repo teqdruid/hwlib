@@ -1,4 +1,4 @@
-/ngspice-bin/
+/ngspice-bin
 *.net
 *.raw
 *.out
