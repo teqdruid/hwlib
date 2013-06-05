@@ -3,9 +3,12 @@
 
 #include "spice_simulation.hpp"
 
+#include <boost/enable_shared_from_this.hpp>
+
 namespace hwlib {
 
-class LevelHalt : public Monitor, public HaltCondition {
+class LevelHalt : public Monitor, public HaltCondition,
+ 				  public boost::enable_shared_from_this<LevelHalt>{
 	std::string net_name;
 	std::string base_net_name;
 	double last_voltage;
@@ -14,16 +17,17 @@ public:
 	double level;
 	bool rising;
 
-	LevelHalt(SpiceSimulation* sim,
-			  std::string net, std::string base_net,
+	LevelHalt(std::string net, std::string base_net,
 			  double level, bool rising) {
 		this->net_name = net;
 		this->base_net_name = base_net;
 		this->level = level;
 		this->rising = rising;
+	}
 
-		sim->add_monitor(this);
-		sim->add_halt(this);
+	void setup(SpiceSimulationPtr sim) {
+		sim->add_monitor(this->shared_from_this());
+		sim->add_halt(this->shared_from_this());
 	}
 
 	std::vector<std::string> get_vector_names() {

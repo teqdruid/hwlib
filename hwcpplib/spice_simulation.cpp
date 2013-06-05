@@ -58,6 +58,7 @@ static int ng_data(pvecvaluesall vdata, int numvecs, SpiceSimulation* sim)
 		if (hc->halt()) {
 			// HALT requested!
 			halt = true;
+			sim->halts_requested.push_back(hc);
 		}
 	}
 	if (halt) {
@@ -195,6 +196,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	assert(rc == 0 && "ngspice Error parsing netlist!");
 
 	// Resetting halts
+	halts_requested.clear();
 	BOOST_FOREACH(auto hc, halts) {
 		hc->reset();
 	}
@@ -217,6 +219,7 @@ void SpiceSimulation::resume() {
 	assert(bg_status == Halted && "Can only resume halted simulation!");
 
 	// Resetting halts
+	halts_requested.clear();
 	BOOST_FOREACH(auto hc, halts) {
 		hc->reset();
 	}

@@ -21,13 +21,11 @@ d.pair({i1.input: pwl.plus,
 
 d.print_netlist(sys.stdout)
 
-s = Simulation(d, "10n", "test simulation", "test.raw")
-pmon = s.power(d.vpwr)
-outlevel = s.levelhalt(i1.output, 0.05, False)
-s.run()
-
 inp = True
-while s.status == s.status.halted:
+
+
+def toggle(cpp):
+    global inp
     if inp:
         inp = False
         pwl.alter("0v")
@@ -36,7 +34,15 @@ while s.status == s.status.halted:
         inp = True
         pwl.alter("1v")
         outlevel.lowgoing()
-    s.resume()
+
+s = Simulation(d, "10n", "test simulation", "test.raw")
+s.add_start_callback(toggle)
+pmon = s.power(d.vpwr)
+outlevel = s.levelhalt(i1.output, 0.05, False)
+outlevel.callback = toggle
+
+s.run_full()
+
 
 print "Simulation end with ", s.sim.status
 

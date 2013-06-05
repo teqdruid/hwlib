@@ -7,19 +7,22 @@
 #include <set>
 #include <limits>
 #include <cmath>
-
 #include <cassert>
+
+#include <boost/shared_ptr.hpp>
 
 namespace hwlib {
 
 #define MAX_MONITOR_NODES 8
 
-class Monitor {
+class Monitor  {
 public:
 	virtual std::vector<std::string> get_vector_names() { return { }; }
 	virtual void init() { };
 	virtual void data(double abs_time, double time_diff, double* v) { };
 };
+
+typedef boost::shared_ptr<Monitor> MonitorPtr;
 
 class HaltCondition {
 protected:
@@ -28,7 +31,13 @@ public:
 	HaltCondition() : dohalt(false) { }
 	virtual bool halt() { return dohalt; }
 	virtual void reset() { this->dohalt = false; }
+
+	uint64_t getid() {
+		return (uint64_t)this;
+	}
 };
+
+typedef boost::shared_ptr<HaltCondition> HaltConditionPtr;
 
 class SpiceSimulation {
 	static bool SpiceInUse;
@@ -41,9 +50,10 @@ class SpiceSimulation {
 
 public:
 	double time_step, time;
-	std::set<Monitor*> monitors;
-	std::set<HaltCondition*> halts;
-	std::map<Monitor*, int*> monitor_indexes;
+	std::set<MonitorPtr> monitors;
+	std::set<HaltConditionPtr> halts;
+	std::vector<HaltConditionPtr> halts_requested;
+	std::map<MonitorPtr, int*> monitor_indexes;
 
 	volatile enum Status {
 		None,
@@ -68,11 +78,11 @@ public:
 	void set_netlist(std::string netlist) {
 		this->netlist = netlist;
 	}
-	void add_monitor(Monitor* m) {
+	void add_monitor(MonitorPtr m) {
 		assert(m != NULL && "Monitor must not be NULL");
 		this->monitors.insert(m);
 	}
-	void add_halt(HaltCondition* hc) {
+	void add_halt(HaltConditionPtr hc) {
 		assert(hc != NULL && "HaltCondition mustn't be NULL!");
 		this->halts.insert(hc);
 	}
@@ -88,6 +98,8 @@ public:
 private:
 	void run_loop();
 };
+
+typedef boost::shared_ptr<SpiceSimulation> SpiceSimulationPtr;
 
 };
 

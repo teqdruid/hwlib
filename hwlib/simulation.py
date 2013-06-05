@@ -19,6 +19,7 @@ class Simulation:
         self.timestep = util.parse_suffix(ts)
         self.monitors = []
         self.halts = []
+        self.start_callbacks = []
 
         self.add_dummy(design)
         self.design.set_simulation(self)
@@ -30,7 +31,15 @@ class Simulation:
         d.pair({r1.a: pwldummy.plus,
                 r1.b: d.vss,
                 pwldummy.minus: d.vss})
-        self.levelhalt(pwldummy.plus, 1.0, True)
+        dummy_lh = self.levelhalt(pwldummy.plus, 1.0, True)
+        dummy_lh.callback = self.start_callback
+
+    def start_callback(self, cpp):
+        for cb in self.start_callbacks:
+            cb(cpp)
+
+    def add_start_callback(self, cb):
+        self.start_callbacks.append(cb)
 
     def print_netlist(self, stream):
         write = ""
@@ -53,14 +62,29 @@ tran {ts} {time}
         for m in self.monitors:
             cppmon = m.create(self)
             self.sim.add_monitor(cppmon)
+
+        self.haltmap = dict()
         for hc in self.halts:
-            hc.create(self)
+            cppmon = hc.create(self)
+            self.haltmap[cppmon.getid()] = hc
+            print cppmon, hc
         if self.outfn != "" and self.outfn is not None:
             self.sim.set_output_file(self.outfn)
+
         self.sim.run_trans(self.timestep, self.time)
+        self.halt_callbacks()
 
     def resume(self):
         self.sim.resume()
+        self.halt_callbacks()
+
+    def halt_callbacks(self):
+        halts = self.sim.halts_requested
+        for cppmon in halts:
+            id = cppmon.getid()
+            hc = self.haltmap[id]
+            if hasattr(hc, "callback"):
+                hc.callback(cppmon)
 
     def run_full(self):
         self.run()
@@ -123,8 +147,9 @@ class LevelHalt:
     def create(self, sim):
         net = resolve_net(self.net)
         base_net = resolve_net(self.base_net)
-        self.cppmon = hwcpplib.levelhalt(sim.sim, net, base_net,
+        self.cppmon = hwcpplib.levelhalt(net, base_net,
                                          self.level, self.rising)
+        self.cppmon.setup(sim.sim)
         return self.cppmon
 
     def highgoing(self):
