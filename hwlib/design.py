@@ -92,6 +92,10 @@ class Circuit:
     def length(self, length_str):
         return self.parent.length(length_str)
 
+    def add_assertions(self):
+        for c in self.components:
+            c.add_assertions()
+
     def print_components(self, stream):
         for c in self.components:
             c.print_netlist(stream)
@@ -157,6 +161,12 @@ class Design(Circuit):
             return float(length_str[0:-1]) * self.min_feat_size
 
         raise ParseException("Did not recognize length string format")
+
+    def add_assertions(self):
+        for subckt in self.subckts:
+            subckt.add_assertions()
+        for c in self.components:
+            c.add_assertions()
 
     def print_includes(self, stream):
         stream.write("*  -- Includes --\n")

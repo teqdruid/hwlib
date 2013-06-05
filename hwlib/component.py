@@ -35,6 +35,9 @@ class Component:
         self.design = design
         design.add_component(self)
 
+    def add_assertions(self):
+        pass
+
     def alter(self, param):
         sid = self.get_spice_id()
         self.design.sim.alter(sid, param)
