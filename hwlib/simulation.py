@@ -6,7 +6,7 @@ import hwcpplib
 import StringIO
 
 from component import Component
-from hwlib.basics import VPwl, Resistor
+from hwlib.basics import VPulse, Resistor
 
 
 class Simulation:
@@ -20,26 +20,34 @@ class Simulation:
         self.monitors = []
         self.halts = []
         self.start_callbacks = []
+        self.periodic_callbacks = []
 
         self.add_dummy(design)
         self.design.set_simulation(self)
 
     def add_dummy(self, d):
-        pwldummy = VPwl(d, [(0, 0),
-                       ("100p", 1.0)])
+        pulse = VPulse(d, 1.0, 1e-9)
         r1 = Resistor(d, 100000000)
-        d.pair({r1.a: pwldummy.plus,
+        d.pair({r1.a: pulse.plus,
                 r1.b: d.vss,
-                pwldummy.minus: d.vss})
-        dummy_lh = self.levelhalt(pwldummy.plus, 1.0, True)
-        dummy_lh.callback = self.start_callback
+                pulse.minus: d.vss})
+        dummy_lh = self.levelhalt(pulse.plus, 1.0, True)
+        dummy_lh.callback = self.callback
+        self.callback_count = 0
 
-    def start_callback(self, cpp):
-        for cb in self.start_callbacks:
+    def callback(self, cpp):
+        self.callback_count += 1
+        if self.callback_count == 1:
+            for cb in self.start_callbacks:
+                cb(cpp)
+        for cb in self.periodic_callbacks:
             cb(cpp)
 
     def add_start_callback(self, cb):
         self.start_callbacks.append(cb)
+
+    def add_periodic_callback(self, cb):
+        self.periodic_callbacks.append(cb)
 
     def print_netlist(self, stream):
         write = ""

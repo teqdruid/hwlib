@@ -24,6 +24,24 @@ class VPwl(Component):
         self.v_pairs = " ".join(map(lambda p: "%s %s" % p, vpairs))
 
 
+class VPulse(Component):
+
+    netlist_format = \
+        "V{id} {connections} pulse({v1} {v2} {td} {tr} {tf} {pw} {period})"
+    connection_names = ['plus', 'minus']
+
+    def __init__(self, design, v2, period, duty_cycle=0.5,
+                 td=0, tr=0, tf=0, v1=0):
+        Component.__init__(self, design)
+        self.v2 = v2
+        self.period = period
+        self.pw = period * duty_cycle
+        self.td = td
+        self.tr = tr
+        self.tf = tf
+        self.v1 = v1
+
+
 class NMos(Component):
 
     netlist_format = "Mn{id} {connections} nmos l={length:len} w={width:len}"
