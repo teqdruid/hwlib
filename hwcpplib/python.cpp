@@ -2,6 +2,8 @@
 using namespace boost::python;
 
 #include "spice_simulation.hpp"
+#include "monitors.hpp"
+#include "halts.hpp"
 
 namespace hwlib {
 
