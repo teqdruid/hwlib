@@ -77,6 +77,10 @@ class Circuit:
             term.net.remove(term)
         term.net = Net(self.get_id())
 
+    def allow_disconnect(self, term):
+        if term.net is None:
+            term.net = Net(self.get_id())
+
     def connect(self, termA, termB):
         if termA.net is None and termB.net is None:
             net = Net(self.get_id())
