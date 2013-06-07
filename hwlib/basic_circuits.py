@@ -57,3 +57,41 @@ class PassGate(SubcktComponent):
         p.source = "b"
         n.body = "vss"
         p.body = "vdd"
+
+
+class StackedTristateInverter(SubcktComponent):
+
+    subckt_basename = "STriInverter"
+    netlist_format = "Xstinv{id} {connections} {subckt}"
+    connection_names = ["input", "output", "en", "enp", "vdd", "vss"]
+    suffix_components = ["width", "ratio"]
+
+    def __init__(self, design, width="1x", ratio=2):
+        self.width = design.length(width)
+        self.ratio = ratio
+        SubcktComponent.__init__(self, design)
+        design.connect(self.vdd, design.vdd)
+        design.connect(self.vss, design.vss)
+
+    def assemble_subckt(self, design):
+        ne = NMos(design, self.width)
+        pe = PMos(design, (self.width * self.ratio))
+
+        ne.drain = "vss"
+        pe.drain = "vdd"
+        ne.gate = "en"
+        pe.gate = "enp"
+        ne.body = "vss"
+        pe.body = "vdd"
+
+        ni = NMos(design, self.width)
+        pi = PMos(design, (self.width * self.ratio))
+        ni.gate = "input"
+        pi.gate = "input"
+        ni.source = "output"
+        pi.source = "output"
+        ni.body = "vss"
+        pi.body = "vdd"
+
+        design.pair({ne.source: ni.drain,
+                     pe.source: pi.drain})
