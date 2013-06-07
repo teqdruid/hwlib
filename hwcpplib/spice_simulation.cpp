@@ -187,7 +187,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 
 	char** lineptr = linesC;
 	while (*lineptr != NULL) {
-		puts(*lineptr);
+		// puts(*lineptr);
 		lineptr++;
 	}
 
