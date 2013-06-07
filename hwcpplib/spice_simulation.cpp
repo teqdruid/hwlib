@@ -88,7 +88,6 @@ static int ng_initdata(pvecinfoall intdata, SpiceSimulation* sim)
     	auto names = m->get_vector_names();
     	assert(names.size() <= MAX_MONITOR_NODES);
 
-    	m->init();
 
     	int* idxs = new int[MAX_MONITOR_NODES];
     	for (size_t i=0; i<MAX_MONITOR_NODES; i++) {
@@ -199,6 +198,10 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	halts_requested.clear();
 	BOOST_FOREACH(auto hc, halts) {
 		hc->reset();
+	}
+
+	BOOST_FOREACH(auto m, monitors) {
+    	m->init();
 	}
 
 	printf("Running simulation...\n");
