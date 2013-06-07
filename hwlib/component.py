@@ -59,7 +59,7 @@ class Component:
         if isinstance(c, str):
             return c
         if c is None or c.net is None:
-            raise UnconnectedException(cname)
+            raise UnconnectedException(self, cname)
         return c.net.get_name()
 
     def print_netlist(self, stream):

@@ -51,6 +51,12 @@ public:
 		} else if (!rising && v <= level && last_voltage > level) {
 			dohalt = true;
 		}
+		
+		// if (dohalt) {
+		// 	printf("Halt requested: %s %d %lf %lf %lf\n", this->net_name.c_str(), this->rising, v, last_voltage, level);
+		// } else {
+		// 	printf("Halt not requested: %s %d %lf %lf %lf\n", this->net_name.c_str(), this->rising, v, last_voltage, level);
+		// }
 		last_voltage = v;
 	}
 };

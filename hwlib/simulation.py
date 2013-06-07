@@ -31,6 +31,7 @@ class Simulation:
         d.pair({r1.a: pulse.plus,
                 r1.b: d.vss,
                 pulse.minus: d.vss})
+        d.name({pulse.plus: "clk"})
         dummy_lh = self.levelhalt(pulse.plus, 1.0, True)
         dummy_lh.callback = self.callback
         self.callback_count = 0
@@ -74,7 +75,9 @@ tran {ts} {time}
         self.haltmap = dict()
         for hc in self.halts:
             cppmon = hc.create(self)
-            self.haltmap[cppmon.getid()] = hc
+            cppid = cppmon.getid()
+            assert cppid not in self.haltmap
+            self.haltmap[cppid] = hc
         if self.outfn != "" and self.outfn is not None:
             self.sim.set_output_file(self.outfn)
 

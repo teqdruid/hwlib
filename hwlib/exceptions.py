@@ -10,5 +10,7 @@ class ParseException(BaseException):
 
 class UnconnectedException(BaseException):
 
-    def __init__(self, term):
-        BaseException.__init__(self, "Found unconnected terminal: %s" % term)
+    def __init__(self, dev, term):
+        BaseException.__init__(
+            self, "Found unconnected terminal '%s' in device '%s'" % (
+                term, dev))
