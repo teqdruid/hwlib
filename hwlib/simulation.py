@@ -11,7 +11,7 @@ from hwlib.basics import VPulse, Resistor
 
 class Simulation:
 
-    def __init__(self, design, time, name="simulation", outfn="", ts="10p"):
+    def __init__(self, design, time, name="simulation", outfn="", ts="1p"):
         self.time = util.parse_suffix(time)
         self.design = design
         self.name = name

@@ -39,6 +39,10 @@ class Net:
     def isdisconnected(self):
         return len(self.terminals) == 1
 
+    def remove(self, term):
+        self.terminals.remove(term)
+        term.net = None
+
     def name(self, name):
         self.id = name
 
@@ -75,7 +79,6 @@ class Circuit:
             if term.net.isdisconnected():
                 return
             term.net.remove(term)
-        term.net = Net(self.get_id())
 
     def allow_disconnect(self, term):
         if term.net is None:
@@ -124,8 +127,8 @@ class Circuit:
     def __getattr__(self, key):
         if self.parent is None:
             raise AttributeError("Circuit has no attribute: %s" % key)
-        if key in self.parent.__dict__:
-            return self.parent.__dict__[key]
+        if hasattr(self.parent, key):
+            return getattr(self.parent, key)
         else:
             raise AttributeError("Circuit has no attribute: %s" % key)
 
@@ -141,9 +144,9 @@ class Design(Circuit):
         self.vdd = self.vpwr.plus
         self.vss = self.vpwr.minus
 
-        self.disconnect(self.vdd)
+        self.allow_disconnect(self.vdd)
         self.vdd.net.id = "vdd"
-        self.disconnect(self.vss)
+        self.allow_disconnect(self.vss)
         self.vss.net.id = "vss"
 
         # NGSpice likes a zero reference
