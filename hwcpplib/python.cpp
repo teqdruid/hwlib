@@ -18,6 +18,8 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("resume", &SpiceSimulation::resume)
 		.def_readonly("status", &SpiceSimulation::bg_status)
 		.def_readonly("halts_requested", &SpiceSimulation::halts_requested)
+		.def_readonly("time", &SpiceSimulation::time)
+		.def_readonly("time_step", &SpiceSimulation::time_step)
 		.def("ngspice_command", &SpiceSimulation::ngspice_command)
 		.def("alter", &SpiceSimulation::alter)
 	;

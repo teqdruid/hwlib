@@ -90,6 +90,7 @@ tran {ts} {time}
 
     def halt_callbacks(self):
         halts = self.sim.halts_requested
+        self.time = self.sim.time
         for cppmon in halts:
             id = cppmon.getid()
             hc = self.haltmap[id]
