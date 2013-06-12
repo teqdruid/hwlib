@@ -21,6 +21,7 @@ class Simulation:
         self.halts = []
         self.start_callbacks = []
         self.periodic_callbacks = []
+        self.init_conds = []
 
         self.add_dummy(design)
         self.design.set_simulation(self)
@@ -50,6 +51,9 @@ class Simulation:
     def add_periodic_callback(self, cb):
         self.periodic_callbacks.append(cb)
 
+    def set_ic(self, node, v):
+        self.init_conds.append((node, v))
+
     def print_netlist(self, stream):
         write = ""
         if self.outfn != "" and self.outfn is not None:
@@ -65,6 +69,8 @@ tran {ts} {time}
     def run(self):
         netlist = StringIO.StringIO()
         self.design.print_netlist(netlist)
+        for (node, v) in self.init_conds:
+            netlist.write(".IC V(%s) = %s\n" % (resolve_net(node), v))
         self.sim = hwcpplib.spicesimulation(self.name, netlist.getvalue())
         netlist.close()
 
