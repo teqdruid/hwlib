@@ -77,8 +77,8 @@ class StackedTristateInverter(SubcktComponent):
         ne = NMos(design, self.width)
         pe = PMos(design, (self.width * self.ratio))
 
-        ne.drain = "vss"
-        pe.drain = "vdd"
+        ne.source = "output"
+        pe.source = "output"
         ne.gate = "en"
         pe.gate = "enp"
         ne.body = "vss"
@@ -88,10 +88,10 @@ class StackedTristateInverter(SubcktComponent):
         pi = PMos(design, (self.width * self.ratio))
         ni.gate = "input"
         pi.gate = "input"
-        ni.source = "output"
-        pi.source = "output"
+        ni.drain = "vss"
+        pi.drain = "vdd"
         ni.body = "vss"
         pi.body = "vdd"
 
-        design.pair({ne.source: ni.drain,
-                     pe.source: pi.drain})
+        design.pair({ne.drain: ni.source,
+                     pe.drain: pi.source})
