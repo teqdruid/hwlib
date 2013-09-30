@@ -44,7 +44,8 @@ class Component:
 
     def get_spice_line(self):
         f = NetlistFormatter()
-        d = dict(self.__dict__)
+        d = dict(self.__class__.__dict__)
+        d.update(self.__dict__)
         d["connections"] = " ".join(map(self.get_connection_str,
                                         self.connection_names))
         for cn in self.connection_names:

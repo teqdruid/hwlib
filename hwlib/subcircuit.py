@@ -22,7 +22,7 @@ class Subcircuit(Circuit):
 class SubcktComponent(Component):
 
     subckt_basename = ""
-    netlist_format = "Xinv{id} {connections} {subckt}"
+    netlist_format = "X{subckt_basename}{id} {connections} {subckt}"
     suffix_components = []
 
     def __init__(self, design):

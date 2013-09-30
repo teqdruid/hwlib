@@ -8,7 +8,6 @@ from basics import NMos, PMos
 class Inverter(SubcktComponent):
 
     subckt_basename = "Inverter"
-    netlist_format = "Xinv{id} {connections} {subckt}"
     connection_names = ["input", "output", "vdd", "vss"]
     suffix_components = ["width", "ratio"]
 
@@ -35,7 +34,6 @@ class Inverter(SubcktComponent):
 class PassGate(SubcktComponent):
 
     subckt_basename = "PassGate"
-    netlist_format = "Xpg{id} {connections} {subckt}"
     connection_names = ["a", "b", "en", "enp", "vdd", "vss"]
     suffix_components = ["width", "ratio"]
 
@@ -62,7 +60,6 @@ class PassGate(SubcktComponent):
 class StackedTristateInverter(SubcktComponent):
 
     subckt_basename = "STriInverter"
-    netlist_format = "Xstinv{id} {connections} {subckt}"
     connection_names = ["input", "output", "en", "enp", "vdd", "vss"]
     suffix_components = ["width", "ratio"]
 
