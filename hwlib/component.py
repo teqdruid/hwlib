@@ -16,6 +16,13 @@ class NetlistFormatter(Formatter):
         return format(value, format_spec)
 
 
+class WArray:
+
+    def __init__(self, name, num_wires):
+        self.name = name
+        self.num_wires = num_wires
+
+
 class Component:
 
     class Terminal:

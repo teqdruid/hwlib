@@ -8,6 +8,12 @@ class ParseException(BaseException):
         BaseException.__init__(self, msg)
 
 
+class BadConnectionException(BaseException):
+
+    def __init__(self, msg):
+        BaseException.__init__(self, msg)
+
+
 class UnconnectedException(BaseException):
 
     def __init__(self, dev, term):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from hwlib.exceptions import ParseException
+from hwlib.exceptions import ParseException, BadConnectionException
 from hwlib.basics import Voltage
 import util
 
@@ -32,9 +32,16 @@ class Net:
         term.net = self
 
     def mergeIn(self, other):
+        if isinstance(self.id, str) and isinstance(other.id, str) and \
+                self.id != other.id:
+            raise BadConnectionException(
+                "Cannot connent different named nets: %s, %s" %
+                (self.id, other.id))
         self.terminals.update(other.terminals)
         for term in other.terminals:
             term.net = self
+        if isinstance(other.id, str):
+            self.id = other.id
 
     def isdisconnected(self):
         return len(self.terminals) == 1
@@ -44,6 +51,10 @@ class Net:
         term.net = None
 
     def name(self, name):
+        if isinstance(self.id, str) and isinstance(name, str) and \
+                self.id != name:
+            raise BadConnectionException(
+                "Cannot rename net '%s' to '%s'!" % (self.id, name))
         self.id = name
 
     def get_name(self):
@@ -85,7 +96,12 @@ class Circuit:
             term.net = Net(self.get_id())
 
     def connect(self, termA, termB):
-        if termA.net is None and termB.net is None:
+        if isinstance(termB, str):
+            if termA.net is None:
+                termA.net = Net(termB)
+            else:
+                termA.net.name(termB)
+        elif termA.net is None and termB.net is None:
             net = Net(self.get_id())
             net.connect(termA)
             net.connect(termB)
@@ -135,12 +151,12 @@ class Circuit:
 
 class Design(Circuit):
 
-    def __init__(self, process_library="45nm_HP"):
+    def __init__(self, vdd_voltage=1.0, process_library="45nm_HP"):
         Circuit.__init__(self, None)
         self.headers = set()
         self.subckts = dict()
 
-        self.vpwr = Voltage(self, 1.0)
+        self.vpwr = Voltage(self, vdd_voltage)
         self.vdd = self.vpwr.plus
         self.vss = self.vpwr.minus
 
