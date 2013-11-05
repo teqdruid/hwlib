@@ -14,7 +14,11 @@ LIBRARIES = {
     "45nm_HP": {
         "min_feat_size": 45 * NM,
         "includes": ['ptm/45nm_HP.pm']
-    }
+    },
+    "22nm_HP": {
+        "min_feat_size": 22 * NM,
+        "includes": ['ptm/22nm_HP.pm']
+    },
 }
 
 import os
