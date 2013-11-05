@@ -9,18 +9,19 @@ class Inverter(SubcktComponent):
 
     subckt_basename = "Inverter"
     connection_names = ["input", "output", "vdd", "vss"]
-    suffix_components = ["width", "ratio"]
+    suffix_components = ["width", "ratio", "length"]
 
-    def __init__(self, design, width="1x", ratio=2):
+    def __init__(self, design, width="1x", ratio=2, length="1x"):
         self.width = design.length(width)
+        self.length = design.length(length)
         self.ratio = ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
         design.connect(self.vss, design.vss)
 
     def assemble_subckt(self, design):
-        n = NMos(design, self.width)
-        p = PMos(design, (self.width * self.ratio))
+        n = NMos(design, self.width, self.length)
+        p = PMos(design, (self.width * self.ratio), self.length)
         n.drain = "vss"
         p.drain = "vdd"
         n.gate = "input"
