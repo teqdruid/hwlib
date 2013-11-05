@@ -30,10 +30,10 @@ class FullAdder(SubcktComponent):
 
         (nnDrain, nnSource) = \
             par([
-                ser([par([n("a", "4x"), n("b", "4x")]),
-                     n("c", "4x")]),
-                ser([n("b"),
-                     n("a")])])
+                ser([n("c", "4x"),
+                     par([n("a", "4x"), n("b", "4x")])]),
+                ser([n("a"),
+                     n("b")])])
         design.connect(nnSource, "vss")
         design.connect(nnDrain, pnSource)
 
