@@ -27,7 +27,7 @@ class Simulation:
         self.design.set_simulation(self)
 
     def add_dummy(self, d):
-        pulse = VPulse(d, None, 1e-9)
+        pulse = VPulse(d, None, 0.5e-9)
         r1 = Resistor(d, 100000000)
         d.pair({r1.a: pulse.plus,
                 r1.b: d.vss,
