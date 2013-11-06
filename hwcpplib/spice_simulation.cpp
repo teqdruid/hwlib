@@ -14,7 +14,7 @@ bool SpiceSimulation::SpiceInUse = false;
 /* Callback function called from bg thread in ngspice to transfer
    any string created by printf or puts. Output to stdout in ngspice is
    preceded by token stdout, same with stderr.*/
-static int ng_getchar(char* outputreturn, void* userdata)
+static int ng_getchar(char* outputreturn, int id, void* userdata)
 {
     // printf("%s\n", outputreturn);
     return 0;
@@ -22,14 +22,14 @@ static int ng_getchar(char* outputreturn, void* userdata)
 
 /* Callback function called from bg thread in ngspice to transfer
    simulation status (type and progress in percent. */
-static int ng_getstat(char* outputreturn, void* userdata)
+static int ng_getstat(char* outputreturn, int id, void* userdata)
 {
     printf("%s\n", outputreturn);
     return 0;
 }
 
 /* Callback function called from bg thread in ngspice once per accepted data point */
-static int ng_data(pvecvaluesall vdata, int numvecs, SpiceSimulation* sim)
+static int ng_data(pvecvaluesall vdata, int numvecs, int id, SpiceSimulation* sim)
 {
 	const double time = sim->time;
 	const double time_step = sim->time_step;
@@ -73,7 +73,7 @@ static int ng_data(pvecvaluesall vdata, int numvecs, SpiceSimulation* sim)
 
 /* Callback function called from bg thread in ngspice once upon intialization
    of the simulation vectors)*/
-static int ng_initdata(pvecinfoall intdata, SpiceSimulation* sim)
+static int ng_initdata(pvecinfoall intdata, int id, SpiceSimulation* sim)
 {
     int i;
     int vn = intdata->veccount;
@@ -110,7 +110,7 @@ static int ng_initdata(pvecinfoall intdata, SpiceSimulation* sim)
     return 0;
 }
 
-static int ng_thread_runs(bool noruns, SpiceSimulation* sim)
+static int ng_thread_runs(bool noruns, int id, SpiceSimulation* sim)
 {
 	if (noruns == true) {
 		if (sim->bg_status == SpiceSimulation::Running)
@@ -124,7 +124,7 @@ static int ng_thread_runs(bool noruns, SpiceSimulation* sim)
 
 /* Callback function called from bg thread in ngspice if fcn controlled_exit()
    is hit. Do not exit, but unload ngspice. */
-static int ng_exit(int exitstatus, bool immediate, bool quitexit, void* userdata)
+static int ng_exit(int exitstatus, bool immediate, bool quitexit, int id, void* userdata)
 {
 
     if(quitexit) {
