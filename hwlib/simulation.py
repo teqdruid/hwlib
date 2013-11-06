@@ -27,13 +27,13 @@ class Simulation:
         self.design.set_simulation(self)
 
     def add_dummy(self, d):
-        pulse = VPulse(d, 1.0, 1e-9)
+        pulse = VPulse(d, None, 1e-9)
         r1 = Resistor(d, 100000000)
         d.pair({r1.a: pulse.plus,
                 r1.b: d.vss,
                 pulse.minus: d.vss})
         d.name({pulse.plus: "clk"})
-        dummy_lh = self.levelhalt(pulse.plus, 1.0, True)
+        dummy_lh = self.levelhalt(pulse.plus, pulse.v2, True)
         dummy_lh.callback = self.callback
         self.callback_count = 0
 

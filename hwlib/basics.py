@@ -11,6 +11,8 @@ class Voltage(Component):
 
     def __init__(self, design, voltage):
         Component.__init__(self, design)
+        if voltage is None:
+            voltage = design.nominal_vdd
         self.voltage = voltage
 
 
@@ -21,6 +23,8 @@ class VPwl(Component):
 
     def __init__(self, design, vpairs):
         Component.__init__(self, design)
+        vpairs = map(lambda (t, v):
+                    (t, design.nominal_vdd if v is None else v), vpairs)
         self.v_pairs = " ".join(map(lambda p: "%s %s" % p, vpairs))
 
 
@@ -33,6 +37,8 @@ class VPulse(Component):
     def __init__(self, design, v2, period, duty_cycle=0.5,
                  td=0, tr=0, tf=0, v1=0):
         Component.__init__(self, design)
+        if v2 is None:
+            v2 = design.nominal_vdd
         self.v2 = v2
         self.period = period
         self.pw = period * duty_cycle
@@ -50,7 +56,7 @@ class NMos(Component):
     def __init__(self, design, width='1x', length='1x'):
         Component.__init__(self, design)
         self.length = design.length(length)
-        self.width = design.length(width)
+        self.width = design.width(width)
         design.connect(self.body, design.vss)
 
 
@@ -62,7 +68,7 @@ class PMos(Component):
     def __init__(self, design, width='2x', length='1x'):
         Component.__init__(self, design)
         self.length = design.length(length)
-        self.width = design.length(width)
+        self.width = design.width(width)
         design.connect(self.body, design.vdd)
 
 

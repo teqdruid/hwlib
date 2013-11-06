@@ -13,10 +13,14 @@ NM = 1e-9
 LIBRARIES = {
     "45nm_HP": {
         "min_feat_size": 45 * NM,
+        "min_gate_width": 160 * NM,
+        "nominal_vdd": 1.0,
         "includes": ['ptm/45nm_HP.pm']
     },
     "22nm_HP": {
         "min_feat_size": 22 * NM,
+        "min_gate_width": 100 * NM,
+        "nominal_vdd": 0.8,
         "includes": ['ptm/22nm_HP.pm']
     },
 }
@@ -155,10 +159,16 @@ class Circuit:
 
 class Design(Circuit):
 
-    def __init__(self, vdd_voltage=1.0, process_library="45nm_HP"):
+    def __init__(self, vdd_voltage=None, process_library="45nm_HP"):
         Circuit.__init__(self, None)
         self.headers = set()
         self.subckts = dict()
+
+        for (k, v) in LIBRARIES[process_library].items():
+            self.__dict__[k] = v
+
+        if vdd_voltage is None:
+            vdd_voltage = self.nominal_vdd
 
         self.vpwr = Voltage(self, vdd_voltage)
         self.vdd = self.vpwr.plus
@@ -173,9 +183,6 @@ class Design(Circuit):
         vss = Voltage(self, 0.0)
         vss.minus = "0"
         self.connect(self.vss, vss.plus)
-
-        for (k, v) in LIBRARIES[process_library].items():
-            self.__dict__[k] = v
 
     def hassubckt(self, subckt):
         return subckt in self.subckts
@@ -200,6 +207,19 @@ class Design(Circuit):
 
         if length_str[-1] == "X" or length_str[-1] == 'x':
             return float(length_str[0:-1]) * self.min_feat_size
+
+        raise ParseException("Did not recognize length string format")
+
+    def width(self, length_str):
+        if isinstance(length_str, float):
+            return length_str
+        if len(length_str) < 2:
+            raise ParseException("length_str is too short")
+        if length_str[-1] == 'm':
+            return util.parse_suffix(length_str[0:-1])
+
+        if length_str[-1] == "X" or length_str[-1] == 'x':
+            return float(length_str[0:-1]) * self.min_gate_width
 
         raise ParseException("Did not recognize length string format")
 
