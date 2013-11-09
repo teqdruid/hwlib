@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from hwlib.component import Component
 from hwlib.exceptions import ParseException, BadConnectionException
 from hwlib.basics import Voltage
 import util
@@ -123,12 +124,17 @@ class Circuit:
     def name(self, names):
         for (term, name) in names.items():
             net = term
-            if not isinstance(term, Net):
-                if term.net is None:
-                    term.net = Net(self.get_id())
-                net = term.net
-            assert name not in self.net_names
-            net.name(name)
+            if isinstance(term, Component):
+                assert name not in self.net_names
+                self.net_names.add(name)
+                term.id = name
+            else:
+                if not isinstance(term, Net):
+                    if term.net is None:
+                        term.net = Net(self.get_id())
+                    net = term.net
+                assert name not in self.net_names
+                net.name(name)
 
     def pair(self, pairs):
         for (a, b) in pairs.items():
@@ -171,6 +177,7 @@ class Design(Circuit):
             vdd_voltage = self.nominal_vdd
 
         self.vpwr = Voltage(self, vdd_voltage)
+        self.name({self.vpwr: "vdd"})
         self.vdd = self.vpwr.plus
         self.vss = self.vpwr.minus
 
@@ -182,6 +189,7 @@ class Design(Circuit):
         # NGSpice likes a zero reference
         vss = Voltage(self, 0.0)
         vss.minus = "0"
+        self.name({vss: "vss"})
         self.connect(self.vss, vss.plus)
 
     def hassubckt(self, subckt):
