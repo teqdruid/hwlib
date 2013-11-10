@@ -49,7 +49,9 @@ class SpiceSimulation {
 	std::string write_filename;
 
 public:
-	double time_step, time;
+	int time_vec_num;
+	double time;
+	double time_step;
 	std::set<MonitorPtr> monitors;
 	std::set<HaltConditionPtr> halts;
 	std::vector<HaltConditionPtr> halts_requested;

@@ -31,11 +31,12 @@ static int ng_getstat(char* outputreturn, int id, void* userdata)
 /* Callback function called from bg thread in ngspice once per accepted data point */
 static int ng_data(pvecvaluesall vdata, int numvecs, int id, SpiceSimulation* sim)
 {
-	const double time = sim->time;
 	const double time_step = sim->time_step;
 	const auto vecs = vdata[0].vecsa;
 	const int veccount = vdata[0].veccount;
 	assert(veccount == numvecs);
+            const double time = vecs[sim->time_vec_num]->creal;
+            sim->time = time;
 
 	BOOST_FOREACH(auto miPair, sim->monitor_indexes) {
 		double values[MAX_MONITOR_NODES];
@@ -51,8 +52,6 @@ static int ng_data(pvecvaluesall vdata, int numvecs, int id, SpiceSimulation* si
 		miPair.first->data(time, time_step, values);
 	}
 
-	sim->time += sim->time_step;
-
 	bool halt = false;
 	BOOST_FOREACH(auto hc, sim->halts) {
 		if (hc->halt()) {
@@ -66,6 +65,7 @@ static int ng_data(pvecvaluesall vdata, int numvecs, int id, SpiceSimulation* si
 		while (sim->bg_status != SpiceSimulation::HaltStarting)
 			usleep(100);
 		// Sleep to make sure the other thread runs the halt before I return
+                        // TODO: This is the dumbest possible way to handle a synchronization issue!
 		usleep(1000);
 	}
 	return 0;
@@ -80,9 +80,15 @@ static int ng_initdata(pvecinfoall intdata, int id, SpiceSimulation* sim)
     std::unordered_map<std::string, int> vecIdx;
     for (i = 0; i < vn; i++) {
     	std::string data = intdata->vecs[i]->vecname;
+            int number = intdata->vecs[i]->number;
+            assert(number == i);
     	std::transform(data.begin(), data.end(), data.begin(), ::tolower);
     	vecIdx[data] = i;
     }
+
+    assert(vecIdx.find("time") != vecIdx.end());
+    sim->time_vec_num = vecIdx["time"];
+    sim->time = 0.0;
 
     BOOST_FOREACH(auto m, sim->monitors) {
     	auto names = m->get_vector_names();
@@ -145,8 +151,9 @@ void SpiceSimulation::InitSpice() {
 }
 
 void SpiceSimulation::UnInitSpice() {
-	ngSpice_Init(NULL, NULL, NULL, NULL,
-				 NULL, NULL, NULL);
+            assert(ngSpice_running() == false);
+	// ngSpice_Init(NULL, NULL, NULL, NULL,
+				 // NULL, NULL, NULL);
 	SpiceInUse = false;
 }
 
@@ -229,7 +236,7 @@ void SpiceSimulation::resume() {
 
 	bg_status = Running;
 	int rc = ngSpice_Command((char*)"bg_resume");
-	assert(rc == 0 && "ngspice Command error on 'bg_halt'");
+	assert(rc == 0 && "ngspice Command error on 'bg_resume'");
 
 	run_loop();
 }
@@ -247,7 +254,6 @@ void SpiceSimulation::run_loop() {
 		while (bg_status != Halted)
 			sched_yield();
 	} else if (bg_status == Done) {
-		UnInitSpice();
 
 		if (this->write_filename != "") {
 			char buf[1024];
@@ -256,6 +262,13 @@ void SpiceSimulation::run_loop() {
 			int rc = ngSpice_Command(buf);
 			assert(rc == 0 && "ngspice Command error on 'write'");
 		}
+
+                        // int rc = ngSpice_Command((char*)"bg_pstop");
+                        // assert(rc == 0 && "ngspice Command error on 'bg_pstop'");
+
+                        // rc = ngSpice_Command((char*)"quit");
+                        // assert(rc == 0 && "ngspice Command error on 'quit'");
+                        UnInitSpice();
 	}
 }
 
