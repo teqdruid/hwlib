@@ -11,13 +11,17 @@ class Inverter(SubcktComponent):
     connection_names = ["input", "output", "vdd", "vss"]
     suffix_components = ["width", "ratio", "length"]
 
-    def __init__(self, design, width="1x", ratio=2, length="1x"):
+    def __init__(self, design, width="1x", ratio=None, length="1x"):
         self.width = design.length(width)
         self.length = design.length(length)
-        self.ratio = ratio
+        self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
         design.connect(self.vss, design.vss)
+
+    def setVdd(self, vdd):
+        self.design.disconnect(self.vdd)
+        self.design.connect(self.vdd, vdd)
 
     def assemble_subckt(self, design):
         n = NMos(design, self.width, self.length)
@@ -38,9 +42,9 @@ class PassGate(SubcktComponent):
     connection_names = ["a", "b", "en", "enp", "vdd", "vss"]
     suffix_components = ["width", "ratio"]
 
-    def __init__(self, design, width="1x", ratio=2):
+    def __init__(self, design, width="1x", ratio=None):
         self.width = design.length(width)
-        self.ratio = ratio
+        self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
         design.connect(self.vss, design.vss)
@@ -64,9 +68,9 @@ class StackedTristateInverter(SubcktComponent):
     connection_names = ["input", "output", "en", "enp", "vdd", "vss"]
     suffix_components = ["width", "ratio"]
 
-    def __init__(self, design, width="1x", ratio=2):
+    def __init__(self, design, width="1x", ratio=None):
         self.width = design.length(width)
-        self.ratio = ratio
+        self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
         design.connect(self.vss, design.vss)

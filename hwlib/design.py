@@ -16,12 +16,14 @@ LIBRARIES = {
         "min_feat_size": 45 * NM,
         "min_gate_width": 160 * NM,
         "nominal_vdd": 1.0,
+        "pn_ratio": 2.36,
         "includes": ['ptm/45nm_HP.pm']
     },
     "22nm_HP": {
         "min_feat_size": 22 * NM,
         "min_gate_width": 100 * NM,
         "nominal_vdd": 0.8,
+        "pn_ratio": 1.6105,
         "includes": ['ptm/22nm_HP.pm']
     },
 }
