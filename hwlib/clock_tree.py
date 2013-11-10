@@ -9,11 +9,13 @@ import random
 
 class ClockTree:
 
-    def __init__(self, design, fanout=4, vsrc=None, invSize="1x"):
+    def __init__(self, design, fanout=4, vsrc=None,
+                 invSize="1x", allowOdd=False):
         self.design = design
         self.vsrc = vsrc
         self.invSize = invSize
         self.fanout = fanout
+        self.allowOdd = allowOdd
         self.input = Component.Terminal(self)
 
     def driveNet(self, net):
@@ -31,26 +33,31 @@ class ClockTree:
         levels = 0
         while len(terminals) > 1:
             levels += 1
-            newTerminals = []
-            groupDriver = Inverter(self.design, self.invSize)
-            groupDriver.setVdd(self.vsrc)
-            groupSize = 0
-            for t in terminals:
-                if groupSize >= self.fanout:
-                    newTerminals.append(groupDriver.input)
-                    groupDriver = Inverter(self.design, self.invSize)
-                    groupDriver.setVdd(self.vsrc)
-                    groupSize = 0
-                self.design.connect(t, groupDriver.output)
-                groupSize += 1
-            newTerminals.append(groupDriver.input)
-            terminals = newTerminals
+            numGroups = int(math.ceil(float(len(terminals)) / self.fanout))
+            drivers = [Inverter(self.design, self.invSize)
+                       for i in range(numGroups)]
+            for gn in range(numGroups):
+                driver = drivers[gn]
+                driver.setVdd(self.vsrc)
+                for tn in range(self.fanout):
+                    idx = tn + gn * self.fanout
+                    if idx < len(terminals):
+                        t = terminals[idx]
+                        self.design.connect(t, driver.output)
+
+            terminals = [driver.input for driver in drivers]
 
         lastTerminal = terminals[0]
-        # Cannot have an odd number of levels
+
+        # Are we inverting the output?
         if levels % 2 == 1:
-            i = Inverter(self.design, self.invSize)
-            i.setVdd(self.vsrc)
-            self.design.connect(lastTerminal, i.output)
-            lastTerminal = i.input
+            self.isOdd = True
+            if not self.allowOdd:
+                # Cannot have an odd number of levels
+                i = Inverter(self.design, self.invSize)
+                i.setVdd(self.vsrc)
+                self.design.connect(lastTerminal, i.output)
+                lastTerminal = i.input
+        else:
+            self.isOdd = False
         self.design.connect(self.input, lastTerminal)
