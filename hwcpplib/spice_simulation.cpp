@@ -175,6 +175,8 @@ void SpiceSimulation::InitSpice() {
 
         SpiceInUse = true;
 
+        setenv("OMP_NUM_THREADS", "4", 0);
+
         ngdllhandle = dlopen("libngspice.so", RTLD_NOW | RTLD_LOCAL);
         errmsg = dlerror();
         if (errmsg)
@@ -217,13 +219,13 @@ void SpiceSimulation::InitSpice() {
 void SpiceSimulation::UnInitSpice() {
         usleep(1000);
         assert(ngrunning() == false);
-        ngInit = NULL;
-        ngCommand = NULL;
-        ngCirc = NULL;
-        ngrunning = NULL;
-        int rc = dlclose(ngdllhandle);
-        assert(rc == 0 && "Error closing ngspice library");
-        ngdllhandle = NULL;
+        // ngInit = NULL;
+        // ngCommand = NULL;
+        // ngCirc = NULL;
+        // ngrunning = NULL;
+        // int rc = dlclose(ngdllhandle);
+        // assert(rc == 0 && "Error closing ngspice library");
+        // ngdllhandle = NULL;
         SpiceInUse = false;
         // printf("Spice unloaded\n");
 }
