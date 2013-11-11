@@ -75,6 +75,10 @@ class StackedTristateInverter(SubcktComponent):
         design.connect(self.vdd, design.vdd)
         design.connect(self.vss, design.vss)
 
+    def setVdd(self, vdd):
+        self.design.disconnect(self.vdd)
+        self.design.connect(self.vdd, vdd)
+
     def assemble_subckt(self, design):
         ne = NMos(design, self.width)
         pe = PMos(design, (self.width * self.ratio))
