@@ -50,6 +50,7 @@ public:
 	void InitSpice();
 	void UnInitSpice();
 
+	bool quiet, debug;
 	int time_vec_num;
 	double time;
 	double time_step;
@@ -72,6 +73,8 @@ public:
 public:
 	SpiceSimulation(std::string name = std::string(""),
 					std::string netlist = std::string("")) {
+		this->debug = false;
+		this->quiet = false;
 		this->sim_name = name;
 		this->set_netlist(netlist);
 	}

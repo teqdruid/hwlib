@@ -69,7 +69,7 @@ tran {ts} {time}
     def run(self):
         netlist = StringIO.StringIO()
         self.design.print_netlist(netlist)
-        for (node, v) in self.init_conds:
+        for (node, v) in self.init_conds + self.design.init_conds:
             netlist.write(".IC V(%s) = %s\n" % (resolve_net(node), v))
         self.sim = hwcpplib.spicesimulation(self.name, netlist.getvalue())
         netlist.close()

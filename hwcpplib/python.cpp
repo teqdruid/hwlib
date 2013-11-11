@@ -16,6 +16,8 @@ BOOST_PYTHON_MODULE(hwcpplib) {
 		.def("add_halt", &SpiceSimulation::add_halt)
 		.def("run_trans", &SpiceSimulation::run_trans)
 		.def("resume", &SpiceSimulation::resume)
+		.def_readwrite("debug", &SpiceSimulation::debug)
+		.def_readwrite("quiet", &SpiceSimulation::quiet)
 		.def_readonly("status", &SpiceSimulation::bg_status)
 		.def_readonly("halts_requested", &SpiceSimulation::halts_requested)
 		.def_readonly("time", &SpiceSimulation::time)

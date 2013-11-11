@@ -195,6 +195,8 @@ class Design(Circuit):
         self.allow_disconnect(self.vss)
         self.vss.net.id = "0"
 
+        self.init_conds = []
+
         # NGSpice likes a zero reference
         # vss = Voltage(self, 0.0)
         # vss.minus = "0"
@@ -210,6 +212,9 @@ class Design(Circuit):
 
     def set_simulation(self, sim):
         self.sim = sim
+
+    def set_initial_condition(self, net, v):
+        self.init_conds.append((net, v))
 
     def add_header(self, h):
         self.headers.add(h)
