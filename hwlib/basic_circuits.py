@@ -85,7 +85,8 @@ class StackedTristateInverter(SubcktComponent):
         pe.gate = "enp"
         ne.body = "vss"
         pe.body = "vdd"
-
+        design.connect(self.vdd, design.vdd)
+        design.connect(self.vss, design.vss)
         ni = NMos(design, self.width)
         pi = PMos(design, (self.width * self.ratio))
         ni.gate = "input"
@@ -97,3 +98,45 @@ class StackedTristateInverter(SubcktComponent):
 
         design.pair({ne.drain: ni.source,
                      pe.drain: pi.source})
+
+
+class Latch(SubcktComponent):
+
+    subckt_basename = "Latch"
+    connection_names = ["d", "q", "qp", "en", "enp", "vdd", "vss"]
+    suffix_components = []
+
+    def __init__(self, design):
+        SubcktComponent.__init__(self, design)
+        design.connect(self.vdd, design.vdd)
+        design.connect(self.vss, design.vss)
+
+    def assemble_subckt(self, design):
+        self.i1 = Inverter(design)
+        self.i1.output = "qp"
+
+        self.i2 = Inverter(design)
+        self.i2.output = "q"
+        self.i2.input = "qp"
+
+        self.fbpg = PassGate(design)
+        self.fbpg.en = "enp"
+        self.fbpg.enp = "en"
+        self.fbpg.a = "q"
+        design.connect(self.fbpg.b, self.i1.input)
+
+        self.inputPG = PassGate(design)
+        self.inputPG.en = "en"
+        self.inputPG.enp = "enp"
+        self.inputPG.a = "d"
+        design.connect(self.inputPG.b, self.fbpg.b)
+
+        self.i1.vdd = "vdd"
+        self.i2.vdd = "vdd"
+        self.fbpg.vdd = "vdd"
+        self.inputPG.vdd = "vdd"
+
+        self.i1.vss = "vss"
+        self.i2.vss = "vss"
+        self.fbpg.vss = "vss"
+        self.inputPG.vss = "vss"
