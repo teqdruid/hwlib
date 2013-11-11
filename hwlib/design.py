@@ -185,10 +185,11 @@ class Design(Circuit):
         if vdd_voltage is None:
             vdd_voltage = self.nominal_vdd
 
+        self.vss = Component.Terminal(self)
+
         self.vpwr = Voltage(self, vdd_voltage)
         self.name({self.vpwr: "vdd"})
         self.vdd = self.vpwr.plus
-        self.vss = self.vpwr.minus
 
         self.allow_disconnect(self.vdd)
         self.vdd.net.id = "vdd"

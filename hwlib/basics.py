@@ -14,6 +14,7 @@ class Voltage(Component):
         if voltage is None:
             voltage = design.nominal_vdd
         self.voltage = voltage
+        design.connect(self.minus, design.vss)
 
 
 class VPwl(Component):
