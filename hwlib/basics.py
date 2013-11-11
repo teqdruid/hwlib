@@ -31,7 +31,7 @@ class VPwl(Component):
 class VPulse(Component):
 
     netlist_format = \
-        "V{id} {connections} pulse({v1} {v2} {td} {tr} {tf} {pw} {period})"
+        "V{id} {connections} DC 0 AC pulse({v1} {v2} {td} {tr} {tf} {pw} {period})"
     connection_names = ['plus', 'minus']
 
     def __init__(self, design, v2, period, duty_cycle=0.5,
