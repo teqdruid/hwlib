@@ -215,6 +215,7 @@ void SpiceSimulation::InitSpice() {
 }
 
 void SpiceSimulation::UnInitSpice() {
+        usleep(1000);
         assert(ngrunning() == false);
         ngInit = NULL;
         ngCommand = NULL;
