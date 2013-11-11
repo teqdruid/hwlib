@@ -28,7 +28,7 @@ bool SpiceSimulation::SpiceInUse = false;
    preceded by token stdout, same with stderr.*/
 static int ng_getchar(char* outputreturn, int id, void* userdata)
 {
-    // printf("%s\n", outputreturn);
+    printf("%s\n", outputreturn);
     return 0;
 }
 
@@ -58,7 +58,9 @@ static int ng_data(pvecvaluesall vdata, int numvecs, int id, SpiceSimulation* si
 				assert(idx < veccount);
 				assert(vecs[idx]->is_complex == false);
 				values[i] = vecs[idx]->creal;
-			}
+			} else if (idx == -2) {
+                values[i] = 0.0; 
+            }
 		}
 
 		miPair.first->data(time, time_step, values);
@@ -112,12 +114,16 @@ static int ng_initdata(pvecinfoall intdata, int id, SpiceSimulation* sim)
     		if (i<names.size()) {
     			std::string name = names[i];
 		    	std::transform(name.begin(), name.end(), name.begin(), ::tolower);
-		    	auto fidx = vecIdx.find(name);
+                                    if (name == "0") {
+                                        idxs[i] = -2;
+                                    } else {
+        		    	 auto fidx = vecIdx.find(name);
 		    	if (fidx == vecIdx.end()) {
 		    		fprintf(stderr, "Error: could not find vector: '%s'!\n", name.c_str());
 		    		assert(false);
 		    	}
 		    	idxs[i] = fidx->second;
+            }
     		} else {
 	    		idxs[i] = -1;
 	    	}

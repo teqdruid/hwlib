@@ -193,13 +193,13 @@ class Design(Circuit):
         self.allow_disconnect(self.vdd)
         self.vdd.net.id = "vdd"
         self.allow_disconnect(self.vss)
-        self.vss.net.id = "vss"
+        self.vss.net.id = "0"
 
         # NGSpice likes a zero reference
-        vss = Voltage(self, 0.0)
-        vss.minus = "0"
-        self.name({vss: "vss"})
-        self.connect(self.vss, vss.plus)
+        # vss = Voltage(self, 0.0)
+        # vss.minus = "0"
+        # self.name({vss: "0"})
+        # self.connect(self.vss, vss.plus)
 
     def hassubckt(self, subckt):
         return subckt in self.subckts
