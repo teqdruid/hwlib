@@ -180,7 +180,7 @@ void SpiceSimulation::InitSpice() {
         if (errmsg)
             printf("%s\n", errmsg);
         if (ngdllhandle) {
-           printf("ngspice.dll loaded\n");
+           // printf("ngspice.dll loaded\n");
         } else {
            printf("ngspice.dll not loaded !\n");
            exit(1);
@@ -225,7 +225,7 @@ void SpiceSimulation::UnInitSpice() {
         assert(rc == 0 && "Error closing ngspice library");
         ngdllhandle = NULL;
         SpiceInUse = false;
-        printf("Spice unloaded\n");
+        // printf("Spice unloaded\n");
 }
 
 void SpiceSimulation::run_trans(double time_step, double max_time) {
@@ -238,7 +238,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 
 	int rc;
 
-	printf("Parsing netlist...\n");
+	// printf("Parsing netlist...\n");
 	std::vector<char*> lines;
 	lines.push_back(strdup(this->sim_name.c_str()));
 	size_t lineBegin = 0;
@@ -282,7 +282,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
     	m->init();
 	}
 
-	printf("Running simulation...\n");
+	// printf("Running simulation...\n");
 	bg_status = Running;
 	this->time = 0;
 	rc = ngCommand((char*)"bg_run");

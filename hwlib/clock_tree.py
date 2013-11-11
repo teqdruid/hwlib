@@ -25,7 +25,7 @@ class ClockTree:
         random.shuffle(terminals)
         numTerms = len(terminals)
         levelsFrac = math.log(numTerms) / math.log(self.fanout)
-        print "Expecting to create %f levels" % (levelsFrac)
+        # print "Expecting to create %f levels" % (levelsFrac)
 
         for term in terminals:
             self.design.disconnect(term)
