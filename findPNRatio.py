@@ -66,7 +66,7 @@ amt = 1.0
 t = 0
 
 iters = 0
-while abs(t - goal) > 0.00001 and iters < 20:
+while abs(t - goal) > 0.0001 and iters < 20:
     iters += 1
     t = testRatio(library, ratio)
     print ratio, t, abs(t - goal), amt
