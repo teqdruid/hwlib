@@ -23,8 +23,8 @@ class ClockTree:
             net = net.net
         terminals = list(net.terminals)
         random.shuffle(terminals)
-        numTerms = len(terminals)
-        levelsFrac = math.log(numTerms) / math.log(self.fanout)
+        # numTerms = len(terminals)
+        # levelsFrac = math.log(numTerms) / math.log(self.fanout)
         # print "Expecting to create %f levels" % (levelsFrac)
 
         for term in terminals:
