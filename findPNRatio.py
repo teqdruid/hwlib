@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from hwlib.design import Design
+from hwlib.design import Design, LIBRARIES
 from hwlib.basics import VPwl, Resistor
 from hwlib.basic_circuits import Inverter
 from hwlib.simulation import Simulation
@@ -13,11 +13,10 @@ if len(sys.argv) < 2:
     sys.exit(-1)
 
 library = sys.argv[1]
-d = Design(None, library)
 
 
-def testRatio(d, ratio):
-
+def testRatio(library, ratio):
+    d = Design(None, library)
     i = Inverter(d, "1x", ratio)
     rpu = Resistor(d, 1e9)
     rpd = Resistor(d, 1e9)
@@ -60,22 +59,24 @@ def testRatio(d, ratio):
 
     return np.mean(vinputs)
 
-# goal = d.nominal_vdd
+goal = LIBRARIES[library]["nominal_vdd"] / 2
 
-# ratio = 2.0
-# amt = 1
-# t = 0
+ratio = 2.0
+amt = 1.0
+t = 0
 
-# while abs(t - goal) > 0.001:
-#     t = testRatio(d, ratio)
-#     print ratio, t, abs(t - goal), amt
-#     if t > goal:
-#         ratio -= amt
-#     else:
-#         ratio += amt
-#     amt /= 2
+iters = 0
+while abs(t - goal) > 0.00001 and iters < 20:
+    iters += 1
+    t = testRatio(library, ratio)
+    print ratio, t, abs(t - goal), amt
+    if t > goal:
+        ratio -= amt
+    else:
+        ratio += amt
+    amt /= 2
 
-if len(sys.argv) > 2:
-    print testRatio(d, float(sys.argv[2]))
-else:
-    print testRatio(d, 2.0)
+# if len(sys.argv) > 2:
+#     print testRatio(d, float(sys.argv[2]))
+# else:
+#     print testRatio(d, 2.0)

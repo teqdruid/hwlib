@@ -7,9 +7,21 @@
 
 #include "ngspice/sharedspice.h"
 
+#include <dlfcn.h> /* to load libraries*/
+#include <unistd.h>
+#include <ctype.h>
+
 namespace hwlib {
 
+void* ngdllhandle = NULL;
+int  (*ngInit)(SendChar* printfcn, SendStat* statfcn, ControlledExit* ngexit,
+                  SendData* sdata, SendInitData* sinitdata, BGThreadRunning* bgtrun, void* userData) = NULL;
+int  (*ngCommand)(char* command) = NULL;
+int (*ngCirc)(char** circarray) = NULL;
+bool (*ngrunning)(void) = NULL;
+
 bool SpiceSimulation::SpiceInUse = false;
+
 
 /* Callback function called from bg thread in ngspice to transfer
    any string created by printf or puts. Output to stdout in ngspice is
@@ -130,7 +142,7 @@ static int ng_thread_runs(bool noruns, int id, SpiceSimulation* sim)
 
 /* Callback function called from bg thread in ngspice if fcn controlled_exit()
    is hit. Do not exit, but unload ngspice. */
-static int ng_exit(int exitstatus, bool immediate, bool quitexit, int id, void* userdata)
+static int ng_exit(int exitstatus, bool immediate, bool quitexit, int id, SpiceSimulation* sim)
 {
 
     if(quitexit) {
@@ -138,23 +150,77 @@ static int ng_exit(int exitstatus, bool immediate, bool quitexit, int id, void* 
     }
 
     printf("DNote: Unload ngspice\n");
-    exit(exitstatus);
+    if (immediate) {
+        ngCommand((char*)"bg_pstop");
+        sim->UnInitSpice();
+        sim->bg_status = SpiceSimulation::Killed;
+    } else {
+        sim->bg_status = SpiceSimulation::Kill;
+    }
 
     return exitstatus;
-
 }
 
+
 void SpiceSimulation::InitSpice() {
-	SpiceInUse = true;
-	ngSpice_Init(ng_getchar, ng_getstat, ng_exit, (SendData*)ng_data,
-			     (SendInitData*)ng_initdata, (BGThreadRunning*)ng_thread_runs, this);
+        char* errmsg = NULL;
+        void* handle;
+
+        SpiceInUse = true;
+
+        ngdllhandle = dlopen("libngspice.so", RTLD_NOW | RTLD_LOCAL);
+        errmsg = dlerror();
+        if (errmsg)
+            printf("%s\n", errmsg);
+        if (ngdllhandle) {
+           printf("ngspice.dll loaded\n");
+        } else {
+           printf("ngspice.dll not loaded !\n");
+           exit(1);
+        }
+
+        handle = dlsym(ngdllhandle, "ngSpice_Init");
+        errmsg = dlerror();
+        if (errmsg)
+            puts(errmsg);
+        ngInit = (int (*) (SendChar*, SendStat*, ControlledExit*, SendData*, SendInitData*, BGThreadRunning*, void*)) handle;
+
+        handle = dlsym(ngdllhandle, "ngSpice_Command");
+        errmsg = dlerror();
+        if (errmsg)
+            puts(errmsg);
+        ngCommand = (int  (*)(char*))handle;
+
+        handle = dlsym(ngdllhandle, "ngSpice_Circ");
+        errmsg = dlerror();
+        if (errmsg)
+            puts(errmsg);
+        ngCirc = (int  (*)(char**))handle;
+
+        handle = dlsym(ngdllhandle, "ngSpice_running");
+        errmsg = dlerror();
+        if (errmsg)
+            puts(errmsg);
+        ngrunning = (bool (*)(void))handle;
+
+        ngInit(ng_getchar, ng_getstat, (ControlledExit*)ng_exit, (SendData*)ng_data,
+             (SendInitData*)ng_initdata, (BGThreadRunning*)ng_thread_runs, this);
 }
 
 void SpiceSimulation::UnInitSpice() {
-            assert(ngSpice_running() == false);
-	// ngSpice_Init(NULL, NULL, NULL, NULL,
-				 // NULL, NULL, NULL);
-	SpiceInUse = false;
+        int rc = ngCommand((char*)"bg_pstop");
+        assert(rc == 0 && "ngspice Command error on 'bg_pstop'");
+
+        assert(ngrunning() == false);
+        ngInit = NULL;
+        ngCommand = NULL;
+        ngCirc = NULL;
+        ngrunning = NULL;
+        rc = dlclose(ngdllhandle);
+        assert(rc == 0 && "ngspice Command error on 'bg_pstop'");
+        ngdllhandle = NULL;
+        SpiceInUse = false;
+        printf("Spice unloaded\n");
 }
 
 void SpiceSimulation::run_trans(double time_step, double max_time) {
@@ -198,7 +264,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 		lineptr++;
 	}
 
-	rc = ngSpice_Circ(linesC);
+	rc = ngCirc(linesC);
 	assert(rc == 0 && "ngspice Error parsing netlist!");
 
 	// Resetting halts
@@ -214,7 +280,7 @@ void SpiceSimulation::run_trans(double time_step, double max_time) {
 	printf("Running simulation...\n");
 	bg_status = Running;
 	this->time = 0;
-	rc = ngSpice_Command((char*)"bg_run");
+	rc = ngCommand((char*)"bg_run");
 	assert(rc == 0 && "ngspice Command error on 'bg_run'");
 
 	BOOST_FOREACH(auto line, lines) {
@@ -235,7 +301,7 @@ void SpiceSimulation::resume() {
 	}
 
 	bg_status = Running;
-	int rc = ngSpice_Command((char*)"bg_resume");
+	int rc = ngCommand((char*)"bg_resume");
 	assert(rc == 0 && "ngspice Command error on 'bg_resume'");
 
 	run_loop();
@@ -248,32 +314,25 @@ void SpiceSimulation::run_loop() {
 
 	if (bg_status == HaltRequested) {
 		bg_status = HaltStarting;
-		int rc = ngSpice_Command((char*)"bg_halt");
+		int rc = ngCommand((char*)"bg_halt");
 		assert(rc == 0 && "ngspice Command error on 'bg_halt'");
 
 		while (bg_status != Halted)
 			sched_yield();
-	} else if (bg_status == Done) {
-
+	} else if (bg_status == Done || bg_status == Kill) {
 		if (this->write_filename != "") {
 			char buf[1024];
 			snprintf(buf, 1024, "write %s", this->write_filename.c_str());
 			printf("Writing output file\n");
-			int rc = ngSpice_Command(buf);
+			int rc = ngCommand(buf);
 			assert(rc == 0 && "ngspice Command error on 'write'");
 		}
-
-                        // int rc = ngSpice_Command((char*)"bg_pstop");
-                        // assert(rc == 0 && "ngspice Command error on 'bg_pstop'");
-
-                        // rc = ngSpice_Command((char*)"quit");
-                        // assert(rc == 0 && "ngspice Command error on 'quit'");
-                        UnInitSpice();
+                this->close();
 	}
 }
 
 void SpiceSimulation::ngspice_command(std::string cmd) {
-	int rc = ngSpice_Command((char*)cmd.c_str());
+	int rc = ngCommand((char*)cmd.c_str());
 	assert(rc == 0 && "ngspice Command error");
 }
 
@@ -281,7 +340,7 @@ void SpiceSimulation::alter(std::string device, std::string param) {
 	char buf[10240];
 	std::transform(device.begin(), device.end(), device.begin(), ::tolower);
 	snprintf(buf, 10240, "alter %s = %s", device.c_str(), param.c_str());
-	int rc = ngSpice_Command(buf);
+	int rc = ngCommand(buf);
 	assert(rc == 0 && "ngspice Command error on 'alter'");
 }
 

@@ -41,14 +41,15 @@ typedef boost::shared_ptr<HaltCondition> HaltConditionPtr;
 
 class SpiceSimulation {
 	static bool SpiceInUse;
-	void InitSpice();
-	void UnInitSpice();
 
 	std::string sim_name;
 	std::string netlist;
 	std::string write_filename;
 
 public:
+	void InitSpice();
+	void UnInitSpice();
+
 	int time_vec_num;
 	double time;
 	double time_step;
@@ -63,6 +64,8 @@ public:
 		HaltRequested,
 		HaltStarting,
 		Halted,
+		Kill,
+		Killed,
 		Done
 	} bg_status;
 
@@ -71,6 +74,10 @@ public:
 					std::string netlist = std::string("")) {
 		this->sim_name = name;
 		this->set_netlist(netlist);
+	}
+
+	void close() {
+		UnInitSpice();
 	}
 
 	void set_output_file(std::string outfn) {

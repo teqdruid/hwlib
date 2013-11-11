@@ -6,7 +6,7 @@ env = Environment(CPPPATH=['../ngspice-bin/share/ngspice/include/',
                            '-I/usr/include/python2.7'],
                   CXXFLAGS=['-O2', '-mfpmath=sse', '-msse4', '-march=native',
                             '-Wall', '-g', '-std=c++0x'],
-                  LIBS=['boost_python', 'c', 'ngspice'],
+                  LIBS=['boost_python', 'c', 'dl'],
                   LIBPATH=LibPaths,
                   LINKFLAGS=['-pthread'] + map(lambda x: "-Wl,-rpath=%s" % x, LibPaths))
 
