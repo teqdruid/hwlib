@@ -41,17 +41,17 @@ LIBRARIES = {
         "includes": ['ptm/32nm_HP.pm']
     },
     "22nm_LP": {
-        "min_feat_size": 22 * NM,
-        "min_gate_width": 44 * NM,
+        "min_feat_size": 25 * NM,
+        "min_gate_width": 32 * NM,
         "nominal_vdd": 0.95,
-        "pn_ratio": 1.438,
+        "pn_ratio": 1.391,
         "includes": ['ptm/22nm_LP.pm']
     },
     "22nm_HP": {
-        "min_feat_size": 22 * NM,
-        "min_gate_width": 44 * NM,
+        "min_feat_size": 25 * NM,
+        "min_gate_width": 32 * NM,
         "nominal_vdd": 0.8,
-        "pn_ratio": 1.610,
+        "pn_ratio": 1.703,
         "includes": ['ptm/22nm_HP.pm']
     },
     "16nm_LP": {
