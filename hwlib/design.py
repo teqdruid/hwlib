@@ -12,26 +12,61 @@ __all__ = ["Design"]
 NM = 1e-9
 
 LIBRARIES = {
+    "45nm_LP": {
+        "min_feat_size": 45 * NM,
+        "min_gate_width": 90 * NM,
+        "nominal_vdd": 1.1,
+        "pn_ratio": 1.398,
+        "includes": ['ptm/45nm_LP.pm']
+    },
     "45nm_HP": {
         "min_feat_size": 45 * NM,
-        "min_gate_width": 160 * NM,
+        "min_gate_width": 90 * NM,
         "nominal_vdd": 1.0,
         "pn_ratio": 2.36,
         "includes": ['ptm/45nm_HP.pm']
     },
+    "32nm_LP": {
+        "min_feat_size": 32 * NM,
+        "min_gate_width": 64 * NM,
+        "nominal_vdd": 1.0,
+        "pn_ratio": 1.266,
+        "includes": ['ptm/32nm_LP.pm']
+    },
     "32nm_HP": {
         "min_feat_size": 32 * NM,
-        "min_gate_width": 120 * NM,
+        "min_gate_width": 64 * NM,
         "nominal_vdd": 0.9,
         "pn_ratio": 1.969,
         "includes": ['ptm/32nm_HP.pm']
     },
+    "22nm_LP": {
+        "min_feat_size": 22 * NM,
+        "min_gate_width": 44 * NM,
+        "nominal_vdd": 0.95,
+        "pn_ratio": 1.438,
+        "includes": ['ptm/22nm_LP.pm']
+    },
     "22nm_HP": {
         "min_feat_size": 22 * NM,
-        "min_gate_width": 100 * NM,
+        "min_gate_width": 44 * NM,
         "nominal_vdd": 0.8,
-        "pn_ratio": 1.6105,
+        "pn_ratio": 1.610,
         "includes": ['ptm/22nm_HP.pm']
+    },
+    "16nm_LP": {
+        "min_feat_size": 16 * NM,
+        "min_gate_width": 32 * NM,
+        "nominal_vdd": 0.9,
+        "pn_ratio": 2.438,
+        "includes": ['ptm/16nm_LP.pm']
+    },
+    "16nm_HP": {
+        "min_feat_size": 16 * NM,
+        "min_gate_width": 32 * NM,
+        "nominal_vdd": 0.7,
+        "pn_ratio": 1.863,
+        "includes": ['ptm/16nm_HP.pm']
     },
 }
 

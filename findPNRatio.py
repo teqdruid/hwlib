@@ -46,6 +46,7 @@ def testRatio(library, ratio):
         times.append(sim.time)
     sim.levelhalt(i.output, d.nominal_vdd / 2, True).callback = rising
 
+    sim.quiet = True
     sim.run_full()
 
     vinputs = []
@@ -66,7 +67,7 @@ amt = 1.0
 t = 0
 
 iters = 0
-while abs(t - goal) > 0.0001 and iters < 20:
+while abs(t - goal) > 0.0001 and iters < 25:
     iters += 1
     t = testRatio(library, ratio)
     print ratio, t, abs(t - goal), amt
