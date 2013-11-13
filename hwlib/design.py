@@ -16,56 +16,56 @@ LIBRARIES = {
         "min_feat_size": 45 * NM,
         "min_gate_width": 90 * NM,
         "nominal_vdd": 1.1,
-        "pn_ratio": 1.398,
+        "pn_ratio": 1.484375,
         "includes": ['ptm/45nm_LP.pm']
     },
     "45nm_HP": {
         "min_feat_size": 45 * NM,
         "min_gate_width": 90 * NM,
         "nominal_vdd": 1.0,
-        "pn_ratio": 2.36,
+        "pn_ratio": 2.5078,
         "includes": ['ptm/45nm_HP.pm']
     },
     "32nm_LP": {
         "min_feat_size": 32 * NM,
         "min_gate_width": 64 * NM,
         "nominal_vdd": 1.0,
-        "pn_ratio": 1.266,
+        "pn_ratio": 1.40625,
         "includes": ['ptm/32nm_LP.pm']
     },
     "32nm_HP": {
         "min_feat_size": 32 * NM,
         "min_gate_width": 64 * NM,
         "nominal_vdd": 0.9,
-        "pn_ratio": 1.969,
+        "pn_ratio": 2.1484375,
         "includes": ['ptm/32nm_HP.pm']
     },
     "22nm_LP": {
         "min_feat_size": 25 * NM,
         "min_gate_width": 32 * NM,
         "nominal_vdd": 0.95,
-        "pn_ratio": 1.391,
+        "pn_ratio": 1.479,
         "includes": ['ptm/22nm_LP.pm']
     },
     "22nm_HP": {
         "min_feat_size": 25 * NM,
         "min_gate_width": 32 * NM,
         "nominal_vdd": 0.8,
-        "pn_ratio": 1.703,
+        "pn_ratio": 1.66406,
         "includes": ['ptm/22nm_HP.pm']
     },
     "16nm_LP": {
         "min_feat_size": 16 * NM,
         "min_gate_width": 32 * NM,
         "nominal_vdd": 0.9,
-        "pn_ratio": 2.438,
+        "pn_ratio": 2.640625,
         "includes": ['ptm/16nm_LP.pm']
     },
     "16nm_HP": {
         "min_feat_size": 16 * NM,
         "min_gate_width": 32 * NM,
         "nominal_vdd": 0.7,
-        "pn_ratio": 1.863,
+        "pn_ratio": 1.3046875,
         "includes": ['ptm/16nm_HP.pm']
     },
 }
@@ -197,6 +197,11 @@ class Circuit:
 
     def print_netlist(self, stream):
         self.print_components(stream)
+
+    def write_netlist(self, fn):
+        f = file(fn, "w")
+        self.print_netlist(f)
+        f.close
 
     def __getattr__(self, key):
         if self.parent is None:

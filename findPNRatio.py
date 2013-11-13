@@ -27,14 +27,15 @@ def testRatio(library, ratio):
 
     vinput = VPwl(d, [
         (0.0, 0.0),
-        (2.5e-9, d.nominal_vdd),
-        (5.0e-9, 0.0)])
+        (2.5e-6, d.nominal_vdd),
+        (5.0e-6, 0.0)])
     d.connect(i.input, vinput.plus)
     d.connect(vinput.minus, d.vss)
     d.name({vinput.plus: "vin",
             i.output: "vout"})
 
-    sim = Simulation(d, "5.1n", "ratioSimulation", "ratio.raw")
+    d.write_netlist("ratio.cir")
+    sim = Simulation(d, "5.1e-6", "ratioSimulation", "ratio.raw", ts="500p")
 
     times = []
 
@@ -51,26 +52,27 @@ def testRatio(library, ratio):
 
     vinputs = []
     for t in times:
-        if t < 2.5e-9:
-            vinput = d.nominal_vdd * (t / 2.5e-9)
+        if t < 2.5e-6:
+            vinput = d.nominal_vdd * (t / 2.5e-6)
         else:
-            t -= 2.5e-9
-            vinput = d.nominal_vdd - d.nominal_vdd * (t / 2.5e-9)
+            t -= 2.5e-6
+            vinput = d.nominal_vdd - d.nominal_vdd * (t / 2.5e-6)
         vinputs.append(vinput)
 
-    return np.mean(vinputs)
+    return vinputs
 
 goal = LIBRARIES[library]["nominal_vdd"] / 2
 
 ratio = 2.0
 amt = 1.0
-t = 0
 
 iters = 0
-while abs(t - goal) > 0.0001 and iters < 25:
+offBy = goal
+while offBy > 0.000001 and iters < 20:
     iters += 1
-    t = testRatio(library, ratio)
-    print ratio, t, abs(t - goal), amt
+    t = np.mean(testRatio(library, ratio))
+    offBy = abs(t - goal)
+    print ratio, t, offBy, amt
     if t > goal:
         ratio -= amt
     else:

@@ -12,7 +12,7 @@ class Inverter(SubcktComponent):
     suffix_components = ["width", "ratio", "length"]
 
     def __init__(self, design, width="1x", ratio=None, length="1x"):
-        self.width = design.length(width)
+        self.width = design.width(width)
         self.length = design.length(length)
         self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
@@ -43,7 +43,7 @@ class PassGate(SubcktComponent):
     suffix_components = ["width", "ratio"]
 
     def __init__(self, design, width="1x", ratio=None):
-        self.width = design.length(width)
+        self.width = design.width(width)
         self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
@@ -69,7 +69,7 @@ class StackedTristateInverter(SubcktComponent):
     suffix_components = ["width", "ratio"]
 
     def __init__(self, design, width="1x", ratio=None):
-        self.width = design.length(width)
+        self.width = design.width(width)
         self.ratio = ratio if ratio is not None else design.pn_ratio
         SubcktComponent.__init__(self, design)
         design.connect(self.vdd, design.vdd)
