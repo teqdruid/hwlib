@@ -57,7 +57,9 @@ class NMos(Component):
     def __init__(self, design, width='1x', length='1x'):
         Component.__init__(self, design)
         self.length = design.length(length)
+        assert self.length >= design.min_feat_size
         self.width = design.width(width)
+        assert self.width >= design.min_gate_width
         design.connect(self.body, design.vss)
 
 
@@ -69,7 +71,9 @@ class PMos(Component):
     def __init__(self, design, width='2x', length='1x'):
         Component.__init__(self, design)
         self.length = design.length(length)
+        assert self.length >= design.min_feat_size
         self.width = design.width(width)
+        assert self.width >= design.min_gate_width
         design.connect(self.body, design.vdd)
 
 
