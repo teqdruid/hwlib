@@ -17,6 +17,7 @@ class ClockTree:
         self.fanout = fanout
         self.allowOdd = allowOdd
         self.input = Component.Terminal(self)
+        self.inverter_count = 0
 
     def driveNet(self, net):
         if isinstance(net, Component.Terminal):
@@ -36,6 +37,7 @@ class ClockTree:
             numGroups = int(math.ceil(float(len(terminals)) / self.fanout))
             drivers = [Inverter(self.design, self.invSize)
                        for i in range(numGroups)]
+            self.inverter_count += len(drivers)
             for gn in range(numGroups):
                 driver = drivers[gn]
                 driver.setVdd(self.vsrc)
@@ -55,6 +57,7 @@ class ClockTree:
             if not self.allowOdd:
                 # Cannot have an odd number of levels
                 i = Inverter(self.design, self.invSize)
+                self.inverter_count += 1
                 i.setVdd(self.vsrc)
                 self.design.connect(lastTerminal, i.output)
                 lastTerminal = i.input
