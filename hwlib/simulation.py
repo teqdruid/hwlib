@@ -23,6 +23,7 @@ class Simulation:
         self.periodic_callbacks = []
         self.init_conds = []
         self.quiet = False
+        self.debug = False
 
         self.add_dummy(design)
         self.design.set_simulation(self)
@@ -74,6 +75,7 @@ tran {ts} {time}
             netlist.write(".IC V(%s) = %s\n" % (resolve_net(node), v))
         self.sim = hwcpplib.spicesimulation(self.name, netlist.getvalue())
         self.sim.quiet = self.quiet
+        self.sim.debug = self.debug
         netlist.close()
 
         for m in self.monitors:

@@ -38,7 +38,16 @@ LIBRARIES = {
         "min_gate_width": 120 * NM,
         "nominal_vdd": 0.9,
         "pn_ratio": 2.1484375,
-        "includes": ['ptm/32nm_HP.pm']
+        "includes": ['ptm/32nm_HP.pm'],
+        "M1Pitch": 110e-9,
+        "M1ResPerM": 4e6,
+        "M1IndPerM": 1.53e6,
+        "M1CoupCapPerM": 15.521e-12,
+        "M1GndCapPerM": 2*203.567e-12,
+#         "M1ResPerM": 0,
+#         "M1IndPerM": 0,
+#         "M1CoupCapPerM": 0,
+#         "M1GndCapPerM": 0,
     },
     "22nm_LP": {
         "min_feat_size": 25 * NM,
@@ -218,6 +227,7 @@ class Design(Circuit):
         Circuit.__init__(self, None)
         self.headers = set()
         self.subckts = dict()
+        self.process_library = process_library
 
         for (k, v) in LIBRARIES[process_library].items():
             self.__dict__[k] = v
